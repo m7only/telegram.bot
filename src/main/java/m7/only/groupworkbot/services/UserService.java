@@ -6,4 +6,6 @@ public interface UserService {
     User findUserByChatId(Long chatId);
 
     User save(User user);
+
+    User findById(Long userId);
 }

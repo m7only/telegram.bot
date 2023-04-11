@@ -49,8 +49,7 @@ public class Report {
     @ToString.Exclude
     private Set<ReportPhoto> photos;
 
-    public Report(User user, String report, LocalDateTime reportDate) {
-        this.report = report;
+    public Report(User user, LocalDateTime reportDate) {
         this.reportDate = reportDate;
         this.user = user;
     }

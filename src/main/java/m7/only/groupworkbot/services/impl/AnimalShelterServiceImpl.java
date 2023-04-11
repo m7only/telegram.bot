@@ -7,6 +7,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * Сервисный класс для работы с сущностью {@link AnimalShelter}
+ */
 @Service
 public class AnimalShelterServiceImpl implements AnimalShelterService {
     private final AnimalShelterRepository animalShelterRepository;

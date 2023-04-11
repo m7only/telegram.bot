@@ -1,7 +1,6 @@
 package m7.only.groupworkbot.services.impl;
 
 import m7.only.groupworkbot.entity.Endpoint;
-import m7.only.groupworkbot.repository.AnimalShelterRepository;
 import m7.only.groupworkbot.repository.EndpointRepository;
 import m7.only.groupworkbot.services.EndpointService;
 import org.springframework.stereotype.Service;
@@ -10,7 +9,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Класс для работы с эндпоинтами.
+ * Сервисный класс для работы с сущностью {@link Endpoint}
  */
 @Service
 public class EndpointServiceImpl implements EndpointService {
