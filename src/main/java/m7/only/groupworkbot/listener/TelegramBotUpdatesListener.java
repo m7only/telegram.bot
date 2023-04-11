@@ -37,8 +37,8 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     public int process(List<Update> updates) {
         try {
             updates.forEach(update -> {
-                logger.info("Обработан update: {}", update);
                 botService.process(update);
+                logger.info("Обработан update: {}", update);
             });
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
