@@ -83,3 +83,11 @@ CREATE TABLE report_photos
     report_id BIGINT REFERENCES reports
 );
 
+--changeSet skryagin:2
+AlTER TABLE report_photos RENAME COLUMN file_name TO file_id;
+
+--changeSet skryagin:3
+ALTER TABLE reports DROP COLUMN behaviour;
+ALTER TABLE reports DROP COLUMN ration;
+ALTER TABLE reports RENAME COLUMN health TO report;
+ALTER TABLE reports ADD COLUMN report_date TIMESTAMP(6);
