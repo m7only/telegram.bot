@@ -34,7 +34,7 @@ public class ScheduledServiceImpl implements ScheduledService {
      * {@code sendTrialEndCongratulations}, {@code User.sendExtendTrial}, {@code User.sendFailure}
      */
     @Override
-    @Scheduled(cron = "* 30 20 * * *")
+    @Scheduled(cron = "* 23 21 * * *")
     public void dailyTask() {
         users = userRepository.findUserByStepParentIsTrue();
         sendTrialEndCongratulations(users);
