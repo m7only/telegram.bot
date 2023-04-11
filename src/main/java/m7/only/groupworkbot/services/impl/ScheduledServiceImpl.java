@@ -23,9 +23,21 @@ import java.util.stream.Collectors;
 @EnableScheduling
 public class ScheduledServiceImpl implements ScheduledService {
 
+    private final String DAILY_REMINDER_MESSAGE = "Напоминаем вам о необходимости отправки ежедневного отчета. " +
+            "Если вы еще не присылали отчёт, то сейчас самое время";
+    private final String USER_WITHOUT_REPORTS_MESSAGE = "Отсутствуют отчеты за последние два дня";
+    private final String CONGRATULATION_MESSAGE = "Поздравляем с успешным окончанием испытательного срока";
+    private final String SEND_EXTEND_TRIAL_MESSAGE = "Вам назначен дополнительный период";
+    private final String SEND_FAILYRE_MESSAGE = "Испытательный срок провален";
+    private final String TRIAL_SUCCESS_MESSAGE = "Закончился испытательный срок";
 
     private UserRepository userRepository;
     private BotServiceImpl botService;
+
+    public ScheduledServiceImpl(UserRepository userRepository, BotServiceImpl botService) {
+        this.userRepository = userRepository;
+        this.botService = botService;
+    }
 
     private  List<User> users = new ArrayList<>();
 
@@ -34,7 +46,7 @@ public class ScheduledServiceImpl implements ScheduledService {
      * {@code sendTrialEndCongratulations}, {@code User.sendExtendTrial}, {@code User.sendFailure}
      */
     @Override
-    @Scheduled(cron = "* 23 21 * * *")
+    @Scheduled(cron = "00 30 20 * * *")
     public void dailyTask() {
         users = userRepository.findUserByStepParentIsTrue();
         sendTrialEndCongratulations(users);
@@ -52,7 +64,7 @@ public class ScheduledServiceImpl implements ScheduledService {
     public void reportReminder() {
         users.stream()
                 .peek(e -> {
-                    botService.sendResponse(e.getChatId(), "Напоминание об отчете", null);
+                    botService.sendResponse(e.getChatId(), DAILY_REMINDER_MESSAGE, null);
                 })
                 .collect(Collectors.toList());
     }
@@ -74,7 +86,7 @@ public class ScheduledServiceImpl implements ScheduledService {
                         .collect(Collectors.toList());
 
         reports.forEach(report -> {
-                    botService.sendResponse(report.getUser().getVolunteer().getChatId(), "НЕт отчетов", null);
+                    botService.sendResponse(report.getUser().getVolunteer().getChatId(), USER_WITHOUT_REPORTS_MESSAGE + report.getUser(), null);
                 });
     }
 
@@ -92,7 +104,7 @@ public class ScheduledServiceImpl implements ScheduledService {
                 .filter(User::getTrialSuccess)
                 .peek(e -> {
                     if(!e.getTrialSuccessInformed()) {
-                        botService.sendResponse(e.getChatId(), "поздравлялка", null);
+                        botService.sendResponse(e.getChatId(), CONGRATULATION_MESSAGE, null);
                         e.setTrialSuccessInformed(true);
                     }
                 })
@@ -115,7 +127,7 @@ public class ScheduledServiceImpl implements ScheduledService {
                 .filter(User::getTrialExtended)
                 .peek(e -> {
                     if(!e.getTrialExtendedInformed()) {
-                        botService.sendResponse(e.getChatId(), "Назначен дополнительный период", null);
+                        botService.sendResponse(e.getChatId(), SEND_EXTEND_TRIAL_MESSAGE, null);
                         e.setTrialExtendedInformed(true);
                     }
                 })
@@ -136,7 +148,7 @@ public class ScheduledServiceImpl implements ScheduledService {
                 .filter(User::getTrialFailure)
                 .peek(e -> {
                     if(!e.getTrialFailureInformed()) {
-                        botService.sendResponse(e.getChatId(), "Назначен дополнительный период", null);
+                        botService.sendResponse(e.getChatId(), SEND_FAILYRE_MESSAGE, null);
                         e.setTrialFailureInformed(true);
                     }
                 })
@@ -155,7 +167,7 @@ public class ScheduledServiceImpl implements ScheduledService {
                 .filter(User::getTrialSuccess)
                 .peek(e -> {
                     if(!e.getTrialSuccess()) {
-                        botService.sendResponse(e.getVolunteer().getChatId(), "Закончился испытательный срок - " + e, null);
+                        botService.sendResponse(e.getVolunteer().getChatId(), TRIAL_SUCCESS_MESSAGE + e, null);
                     }
                 })
                 .collect(Collectors.toList());
