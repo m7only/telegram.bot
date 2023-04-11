@@ -2,6 +2,7 @@ package m7.only.groupworkbot.services.impl;
 
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.CallbackQuery;
+import com.pengrad.telegrambot.model.Document;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
@@ -9,19 +10,18 @@ import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.SendResponse;
 import m7.only.groupworkbot.entity.Endpoint;
+import m7.only.groupworkbot.entity.report.Report;
 import m7.only.groupworkbot.entity.user.User;
-import m7.only.groupworkbot.services.AnimalShelterService;
-import m7.only.groupworkbot.services.BotService;
-import m7.only.groupworkbot.services.EndpointService;
-import m7.only.groupworkbot.services.UserService;
+import m7.only.groupworkbot.services.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.MimeTypeUtils;
 
 import java.util.*;
 
 /**
- * Класс для обработки эндпоинтов.
+ * Класс для обработки {@linkplain Endpoint эндпоинтов}.
  * Эндпоинты с логикой опрделены как константы, private т.к. используются только в этом классе
  * и не предполагается их использование в других классах
  * Энпоинты без логиги (по сути простой фронт с меню) хранятся в базе, их Entity - {@code Endpoint}
@@ -32,6 +32,36 @@ public class BotServiceImpl implements BotService {
      * Текст привествия пользователя в эндпоинте "/start"
      */
     private static final String GREETINGS_TEXT = "Здравствуйте! Я бот приюта для животных. Выберите, пожалуйста, интересующее животное.";
+
+    /**
+     * Текст сообщения, если тип файла(фотографии) не поддерживается
+     */
+    private static final String UNSUPPORTED_IMAGE_FORMAT = "К сожалению, я не поддерживаю такой формат.";
+
+    /**
+     * Сообщение об успешной загрузке фотографии
+     */
+    private static final String REPORT_PHOTO_SUCCESS = "Фотография загружена.";
+
+    /**
+     * Сообщение об успешной загрузке текста отчета
+     */
+    private static final String REPORT_TEXT_SUCCESS = "Описание состояния животного принято.";
+
+    /**
+     * Сообщение-напоминание о необходимости рассказать о животном в отчете
+     */
+    private static final String REPORT_REMIND_NEED_TEXT = "Напоминаю, что помимо фотографии необходимо рассказать о состоянии животного. В отчете за сегодня она отсутствует, пожалуйста, отправьте фотографию.";
+
+    /**
+     * Сообщение-напоминание о необходимости отправить фотографию
+     */
+    private static final String REPORT_REMIND_NEED_PHOTO = "Напоминаю, что помимо описания состояния животного нужно отправить его фотографию. В отчете за сегодня оно отсутствует, пожалуйста, отправьте описание.";
+
+    /**
+     * Сообщение об успешном отчете: в отчете за текущие сутки есть описание и хотя бы одна фотография.
+     */
+    private static final String REPORT_FULL_SUCCESS = "Отчет за сегодня полностью сформирован.";
 
     // ----- ENDPOINTS CONSTANT -----
     /**
@@ -92,17 +122,21 @@ public class BotServiceImpl implements BotService {
      * Количество кнопок в одной строке
      */
     private static final int BUTTONS_IN_ROW = 2;
+
+
     private final Logger logger = LoggerFactory.getLogger(BotServiceImpl.class);
     private final TelegramBot telegramBot;
     private final EndpointService endpointService;
     private final UserService userService;
     private final AnimalShelterService animalShelterService;
+    private final ReportService reportService;
 
-    public BotServiceImpl(TelegramBot telegramBot, EndpointService endpointService, UserService userService, AnimalShelterService animalShelterService) {
+    public BotServiceImpl(TelegramBot telegramBot, EndpointService endpointService, UserService userService, AnimalShelterService animalShelterService, ReportService reportService) {
         this.telegramBot = telegramBot;
         this.endpointService = endpointService;
         this.userService = userService;
         this.animalShelterService = animalShelterService;
+        this.reportService = reportService;
     }
 
     /**
@@ -115,6 +149,7 @@ public class BotServiceImpl implements BotService {
      * то отрабатывает метод {@code showSpecificMenu()}
      * если нет, то с помощью метода {@code showFrontMenu(...)}
      * вызываем простое фронт меню, энпоинты которого хранятся в базе
+     * 3. Если в {@code message} есть фотографии, то вызываем метод {@link #executeEndpointReportByPhoto(Message)}
      *
      * @param update полученный от сервера телеграмм объект Update
      */
@@ -124,20 +159,31 @@ public class BotServiceImpl implements BotService {
         CallbackQuery callbackQuery = update.callbackQuery();
         Optional<String> optionalCommand;
         Long chatId;
+
         if (callbackQuery == null) {
+            // если была нажата кнопка
             chatId = message.chat().id();
             optionalCommand = Optional.ofNullable(message.text());
         } else {
+            // если была текстовая команда
             optionalCommand = Optional.of(callbackQuery.data());
             chatId = update.callbackQuery().message().chat().id();
         }
+
         if (optionalCommand.isPresent()) {
+            // если есть команда от кнопки или текстовая
             String endpointText = optionalCommand.get();
             if (!showSpecificMenu(chatId, endpointText)) {
                 showFrontEndAndMenu(chatId, endpointText);
+//                showFrontEndAndMenu(message, endpointText);
             }
         } else {
-            logger.error("Запрос не распознан: {}", update);
+            if (message.photo() != null || message.document() != null) {
+                // если есть фото или документ
+                executeEndpointReportByPhoto(message);
+            } else {
+                logger.error("Запрос не распознан: {}", update);
+            }
         }
     }
 
@@ -153,7 +199,7 @@ public class BotServiceImpl implements BotService {
         endpointService.findAllEndpoints().stream()
                 .filter(endpoint -> endpoint.getEndpointText().equals(endpointText))
                 .findFirst()
-                .ifPresent(endpoint -> {
+                .ifPresentOrElse(endpoint -> {
                     // --- KEYBOARD ---
                     // лист для кнопок
                     List<InlineKeyboardButton> buttonList = new ArrayList<>();
@@ -175,6 +221,9 @@ public class BotServiceImpl implements BotService {
                     }
                     // --- KEYBOARD ---
                     sendResponse(chatId, endpoint.getContent(), buttonList);
+                }, () -> {
+                    logger.info("Команда не распознана: {}", endpointText);
+                    sendResponse(chatId, "Команда не распознана", null);
                 });
     }
 
@@ -188,11 +237,14 @@ public class BotServiceImpl implements BotService {
     @Override
     public void sendResponse(Long chatId, String content, List<InlineKeyboardButton> buttonList) {
         SendMessage sendMessage = new SendMessage(chatId, content);
-        // из листа кнопок формируем клавиатуру
-        InlineKeyboardMarkup keyboard = buttonsByRows(buttonList);
-        // формируем ответ и добавляем к нему клавиатуру
-        sendMessage.replyMarkup(keyboard);
-        // --- KEYBOARD ---
+        if (buttonList != null) {
+            // --- KEYBOARD ---
+            // из листа кнопок формируем клавиатуру
+            InlineKeyboardMarkup keyboard = buttonsByRows(buttonList);
+            // формируем ответ и добавляем к нему клавиатуру
+            sendMessage.replyMarkup(keyboard);
+            // --- KEYBOARD ---
+        }
         SendResponse sendResponse = telegramBot.execute(sendMessage);
         if (sendResponse != null && !sendResponse.isOk()) {
             logger.error("Ошибка при отправлении ответа: {}", sendResponse.description());
@@ -233,16 +285,17 @@ public class BotServiceImpl implements BotService {
      */
     private boolean showSpecificMenu(Long chatId, String endpointText) {
         String parsed = endpointText.split("_")[0];
+        parsed = parsed.split("\s")[0];
         if (!ENDPOINTS.contains(parsed)) {
             return false;
         }
         switch (parsed) {
-            case ENDPOINT_START -> executeEndpointStart(chatId, endpointText);
+            case ENDPOINT_START -> executeEndpointStart(chatId);
             case ENDPOINT_MAIN_MENU -> executeEndpointMainMenu(chatId, endpointText);
             case ENDPOINT_PRAY -> executeEndpointPray(chatId);
             case ENDPOINT_GET_CONTACTS -> executeEndpointGetContacts(chatId);
             case ENDPOINT_REPORT_INFO -> executeEndpointReportInfo(chatId);
-            case ENDPOINT_REPORT -> executeEndpointReport(chatId);
+            case ENDPOINT_REPORT -> executeEndpointReportByText(chatId, endpointText);
             case ENDPOINT_VIOLATION -> executeEndpointViolation(chatId);
         }
         return true;
@@ -262,22 +315,20 @@ public class BotServiceImpl implements BotService {
      *
      * @param chatId - идентификатор чата с пользователем
      */
-    private void executeEndpointStart(Long chatId, String endpoint_text) {
+    private void executeEndpointStart(Long chatId) {
         User user = userService.findUserByChatId(chatId);
         if (user == null) {
-            List<InlineKeyboardButton> buttonList = new ArrayList<>();
-            animalShelterService.findAllShelters().forEach(animalShelter ->
-                    buttonList
-                            .add(new InlineKeyboardButton(
-                                    animalShelter
-                                            .getAnimalType()
-                                            .getAnimalTitle())
-                                    .callbackData(ENDPOINT_MAIN_MENU + "_" + animalShelter.getAnimalType().name())));
-            sendResponse(chatId, GREETINGS_TEXT, buttonList);
             userService.save(new User(chatId));
-        } else {
-            executeEndpointMainMenu(chatId, endpoint_text);
         }
+        List<InlineKeyboardButton> buttonList = new ArrayList<>();
+        animalShelterService.findAllShelters().forEach(animalShelter ->
+                buttonList
+                        .add(new InlineKeyboardButton(
+                                animalShelter
+                                        .getAnimalType()
+                                        .getAnimalTitle())
+                                .callbackData(ENDPOINT_MAIN_MENU + "_" + animalShelter.getAnimalType().name())));
+        sendResponse(chatId, GREETINGS_TEXT, buttonList);
     }
 
     /**
@@ -330,11 +381,74 @@ public class BotServiceImpl implements BotService {
     }
 
     /**
-     * Метод для отработки энпоинта {@link #ENDPOINT_REPORT}
+     * Метод для отработки энпоинта {@link #ENDPOINT_REPORT}, если прислали фото
+     *
+     * @param message - идентификатор чата с пользователем
+     */
+    private void executeEndpointReportByPhoto(Message message) {
+        Long chatId = message.chat().id();
+        Document document = message.document();
+        String fileId = null;
+
+        if (message.photo() != null) {
+            fileId = message
+                    .photo()[message.photo().length - 1]
+                    .fileId();
+        }
+
+        if (document != null && document.mimeType().equalsIgnoreCase(MimeTypeUtils.IMAGE_JPEG_VALUE)) {
+            fileId = document.fileId();
+        }
+
+        if (fileId == null) {
+            sendResponse(chatId, UNSUPPORTED_IMAGE_FORMAT, null);
+            logger.info("Неподдерживаемый формат: {}", message);
+            return;
+        }
+
+        Report report = reportService.saveReport(
+                userService.findUserByChatId(chatId),
+                message.caption(),
+                fileId
+        );
+
+        sendResponse(chatId, REPORT_PHOTO_SUCCESS, null);
+
+        if (message.caption() == null && (report.getReport() == null || report.getReport().isBlank())) {
+            sendResponse(chatId, REPORT_REMIND_NEED_TEXT, null);
+        } else {
+            sendResponse(chatId, REPORT_TEXT_SUCCESS, null);
+        }
+
+        if ((report.getReport() != null && !report.getReport().isBlank()) && (report.getPhotos() != null && report.getPhotos().size() != 0)) {
+            sendResponse(chatId, REPORT_FULL_SUCCESS, null);
+            executeEndpointStart(chatId);
+        }
+    }
+
+    /**
+     * Метод для отработки энпоинта {@link #ENDPOINT_REPORT},
+     * если прислана команда {@link #ENDPOINT_REPORT}
      *
      * @param chatId - идентификатор чата с пользователем
      */
-    private void executeEndpointReport(Long chatId) {
+    private void executeEndpointReportByText(Long chatId, String endpointText) {
+        Report report = reportService.saveReport(
+                userService.findUserByChatId(chatId),
+                endpointText.replaceAll(ENDPOINT_REPORT, ""),
+                null
+        );
+        sendResponse(chatId, REPORT_TEXT_SUCCESS, null);
+        if (report.getPhotos() == null || report.getPhotos().size() == 0) {
+            sendResponse(chatId, REPORT_REMIND_NEED_PHOTO, null);
+        } else {
+            sendResponse(chatId, REPORT_PHOTO_SUCCESS, null);
+        }
+
+        if (report.getReport() != null && (report.getReport() != null && report.getPhotos().size() != 0)) {
+            sendResponse(chatId, REPORT_FULL_SUCCESS, null);
+            executeEndpointStart(chatId);
+        }
     }
 
     /**

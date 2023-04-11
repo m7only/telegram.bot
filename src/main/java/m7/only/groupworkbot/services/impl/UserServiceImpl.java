@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 
 
 /**
- * Сервисный слой для работы с сущностью User
+ * Сервисный слой для работы с сущностью {@link User}
  */
 @Service
 public class UserServiceImpl implements UserService {
@@ -31,5 +31,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public User save(User user) {
         return userRepository.save(user);
+    }
+
+    @Override
+    public User findById(Long userId) {
+        return userRepository.findById(userId).orElse(new User());
     }
 }
