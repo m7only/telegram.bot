@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import m7.only.groupworkbot.entity.user.User;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 
 /**
@@ -21,22 +22,16 @@ public class Report {
     private Long id;
 
     /**
-     * Рацион животного
+     * Текст отчета
      */
-    @Column(name = "ration")
-    private String ration;
+    @Column(name = "report")
+    private String report;
 
     /**
-     * Общее самочувствие и привыкание к новому месту
+     * Дата создания отчета
      */
-    @Column(name = "health")
-    private String health;
-
-    /**
-     * Изменение в поведении: отказ от старых привычек, приобретение новых
-     */
-    @Column(name = "behaviour")
-    private String behaviour;
+    @Column(name = "report_date")
+    private LocalDateTime reportDate;
 
     /**
      * Пользователь, которому принадлежит отчет
@@ -53,4 +48,10 @@ public class Report {
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     private Set<ReportPhoto> photos;
+
+    public Report(User user, String report, LocalDateTime reportDate) {
+        this.report = report;
+        this.reportDate = reportDate;
+        this.user = user;
+    }
 }
