@@ -20,8 +20,8 @@ public class ReportPhoto {
     /**
      * Имя файла в хранилище
      */
-    @Column(name = "file_name")
-    private String fileName;
+    @Column(name = "file_id")
+    private String fileId;
 
     /**
      * Отчет, к которому относится фото
@@ -32,8 +32,8 @@ public class ReportPhoto {
     @ToString.Exclude
     private Report report;
 
-    public ReportPhoto(String fileName, Report report) {
-        this.fileName = fileName;
+    public ReportPhoto(String fileId, Report report) {
+        this.fileId = fileId;
         this.report = report;
     }
 }
