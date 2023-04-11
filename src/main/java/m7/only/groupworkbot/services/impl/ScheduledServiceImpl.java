@@ -17,6 +17,7 @@ import java.util.List;
 @EnableScheduling
 public class ScheduledServiceImpl implements ScheduledService {
 
+
     /**
      * Напоминание усыновителю о необходимости предоставлять ежедневный отчет.
      * Запланировано на 20:30
@@ -45,6 +46,7 @@ public class ScheduledServiceImpl implements ScheduledService {
     @Scheduled(fixedRateString = "P1D")
     public void dailyTask() {
         List<User> users = new ArrayList<>(); // здесь должен быть что то типа userRepository.findAll
+
         sendTrialEndCongratulations(users);
         sendExtendTrial(users);
         sendFailure(users);
