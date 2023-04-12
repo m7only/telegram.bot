@@ -75,6 +75,10 @@ public class User extends Person {
     @Column(name = "trial_success_informed")
     private Boolean trialSuccessInformed = false;
 
+    @Column(name = "dialog")
+    @Enumerated(EnumType.STRING)
+    private Dialog dialog;
+
     /**
      * Приют, к которому относится пользователь
      */

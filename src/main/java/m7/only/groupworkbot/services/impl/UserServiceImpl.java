@@ -24,17 +24,12 @@ public class UserServiceImpl implements UserService {
      * @return сущность {@code User} или {@code null} если не найден
      */
     @Override
-    public User findUserByChatId(Long chatId) {
-        return userRepository.findByChatId(chatId).orElse(null);
+    public User findUserByChatIdOrCreateNew(Long chatId) {
+        return userRepository.findByChatId(chatId).orElseGet(() -> userRepository.save(new User(chatId)));
     }
 
     @Override
     public User save(User user) {
         return userRepository.save(user);
-    }
-
-    @Override
-    public User findById(Long userId) {
-        return userRepository.findById(userId).orElse(new User());
     }
 }

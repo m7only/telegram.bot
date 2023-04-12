@@ -33,13 +33,12 @@ public class ScheduledServiceImpl implements ScheduledService {
 
     private final UserRepository userRepository;
     private final BotServiceImpl botService;
+    private List<User> users = new ArrayList<>();
 
     public ScheduledServiceImpl(UserRepository userRepository, BotServiceImpl botService) {
         this.userRepository = userRepository;
         this.botService = botService;
     }
-
-    private  List<User> users = new ArrayList<>();
 
     /**
      * Ежедневно получаем из базы всех усыновителей и производим необходимые проверки в методах
@@ -83,11 +82,11 @@ public class ScheduledServiceImpl implements ScheduledService {
                         .filter(report ->
                                 (report.getReportDate().toLocalDate().equals(today)
                                         && report.getReportDate().toLocalDate().equals(today.minusDays(1)))))
-                        .collect(Collectors.toList());
+                .toList();
 
         reports.forEach(report -> {
-                    botService.sendResponse(report.getUser().getVolunteer().getChatId(), USER_WITHOUT_REPORTS_MESSAGE + report.getUser(), null);
-                });
+            botService.sendResponse(report.getUser().getVolunteer().getChatId(), USER_WITHOUT_REPORTS_MESSAGE + report.getUser(), null);
+        });
     }
 
 
@@ -103,7 +102,7 @@ public class ScheduledServiceImpl implements ScheduledService {
         users.stream()
                 .filter(User::getTrialSuccess)
                 .peek(e -> {
-                    if(!e.getTrialSuccessInformed()) {
+                    if (!e.getTrialSuccessInformed()) {
                         botService.sendResponse(e.getChatId(), CONGRATULATION_MESSAGE, null);
                         e.setTrialSuccessInformed(true);
                     }
@@ -126,7 +125,7 @@ public class ScheduledServiceImpl implements ScheduledService {
         users.stream()
                 .filter(User::getTrialExtended)
                 .peek(e -> {
-                    if(!e.getTrialExtendedInformed()) {
+                    if (!e.getTrialExtendedInformed()) {
                         botService.sendResponse(e.getChatId(), SEND_EXTEND_TRIAL_MESSAGE, null);
                         e.setTrialExtendedInformed(true);
                     }
@@ -139,7 +138,7 @@ public class ScheduledServiceImpl implements ScheduledService {
      * установлен ли флаг {@code User.trialFailure} о провале испытательного срока
      * и флаг {@code User.trialFailureInformed} информирования об этом.
      * Если флаг провала стоит и усыновитель не проинформирован, то информируем его,
-     * отправляем стандартное сообщение с дальнейшими действиями и устанавливаем флаг информировнаия
+     * отправляем стандартное сообщение с дальнейшими действиями и устанавливаем флаг информирования
      *
      * @param users лист со всеми пользователями
      */
@@ -147,7 +146,7 @@ public class ScheduledServiceImpl implements ScheduledService {
         users.stream()
                 .filter(User::getTrialFailure)
                 .peek(e -> {
-                    if(!e.getTrialFailureInformed()) {
+                    if (!e.getTrialFailureInformed()) {
                         botService.sendResponse(e.getChatId(), SEND_FAILURE_MESSAGE, null);
                         e.setTrialFailureInformed(true);
                     }
@@ -156,7 +155,7 @@ public class ScheduledServiceImpl implements ScheduledService {
     }
 
     /**
-     * При ежедневном проходе по всем усыновителям проверяем закончился ли истытательный срок.
+     * При ежедневном проходе по всем усыновителям проверяем закончился ли испытательный срок.
      * Если испытательный срок вышел, и флаг {@code User.trialSuccess} не установлен,
      * то отправляем запрос волонтеру о необходимости принятия решения по усыновителю
      *
@@ -166,7 +165,7 @@ public class ScheduledServiceImpl implements ScheduledService {
         users.stream()
                 .filter(User::getTrialSuccess)
                 .peek(e -> {
-                    if(!e.getTrialSuccess()) {
+                    if (!e.getTrialSuccess()) {
                         botService.sendResponse(e.getVolunteer().getChatId(), TRIAL_SUCCESS_MESSAGE + e, null);
                     }
                 })

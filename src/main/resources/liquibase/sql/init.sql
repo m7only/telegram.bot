@@ -91,3 +91,6 @@ ALTER TABLE reports DROP COLUMN behaviour;
 ALTER TABLE reports DROP COLUMN ration;
 ALTER TABLE reports RENAME COLUMN health TO report;
 ALTER TABLE reports ADD COLUMN report_date TIMESTAMP(6);
+
+--changeSet skryagin:4
+ALTER TABLE bot_users ADD COLUMN dialog VARCHAR(255);

@@ -11,6 +11,7 @@ import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.SendResponse;
 import m7.only.groupworkbot.entity.Endpoint;
 import m7.only.groupworkbot.entity.report.Report;
+import m7.only.groupworkbot.entity.user.Dialog;
 import m7.only.groupworkbot.entity.user.User;
 import m7.only.groupworkbot.services.*;
 import org.slf4j.Logger;
@@ -22,16 +23,16 @@ import java.util.*;
 
 /**
  * Класс для обработки {@linkplain Endpoint эндпоинтов}.
- * Эндпоинты с логикой опрделены как константы, private т.к. используются только в этом классе
+ * Эндпоинты с логикой определены как константы, private т.к. используются только в этом классе
  * и не предполагается их использование в других классах
- * Энпоинты без логиги (по сути простой фронт с меню) хранятся в базе, их Entity - {@code Endpoint}
+ * Эндпоинты без логики (по сути простой фронт с меню) хранятся в базе, их Entity - {@code Endpoint}
  */
 @Service
 public class BotServiceImpl implements BotService {
 
     // ----- FEEDBACK CONSTANT -----
     /**
-     * Текст привествия пользователя в эндпоинте "/start"
+     * Текст приветствия пользователя в эндпоинте "/start"
      */
     private static final String GREETINGS_TEXT = "Здравствуйте! Я бот приюта для животных. Выберите, пожалуйста, интересующее животное.";
 
@@ -64,6 +65,20 @@ public class BotServiceImpl implements BotService {
      * Сообщение об успешном отчете: в отчете за текущие сутки есть описание и хотя бы одна фотография.
      */
     private static final String REPORT_FULL_SUCCESS = "Отчет за сегодня полностью сформирован.";
+
+    /**
+     * Сообщение при первом входе в эндпоинт {@link  #ENDPOINT_GET_CONTACTS}. Вводится ФИО.
+     */
+    private static final String GET_CONTACTS_GREETINGS = "Сейчас вы можете оставить или изменить свои контактные данные. Введите свои ФИО.";
+
+    /**
+     * Сообщение при втором входе в эндпоинт {@link  #ENDPOINT_GET_CONTACTS}. Вводится номер телефона.
+     */
+    private static final String GET_CONTACTS_PHONE = "Введите номер своего телефона.";
+    /**
+     * Сообщение при третьем входе в эндпоинт {@link  #ENDPOINT_GET_CONTACTS}. Успешный ввод данных.
+     */
+    private static final String GET_CONTACTS_SUCCESS = "Контактные данные сохранены.";
     // ----- FEEDBACK CONSTANT -----
 
 
@@ -84,7 +99,7 @@ public class BotServiceImpl implements BotService {
     private static final String ENDPOINT_PRAY = "/pray";
 
     /**
-     * Заголовок для энпоинта вызова волонтера,
+     * Заголовок для эндпоинта вызова волонтера {@link #ENDPOINT_PRAY},
      * для формирования кнопки, которая используется в нескольких местах
      */
     private static final String ENDPOINT_PRAY_TITLE = "Обратиться к волонтеру";
@@ -127,8 +142,8 @@ public class BotServiceImpl implements BotService {
     /**
      * Количество кнопок в одной строке
      */
-    // ----- SETTINGS CONSTANT -----
     private static final int BUTTONS_IN_ROW = 2;
+    // ----- SETTINGS CONSTANT -----
 
 
     private final Logger logger = LoggerFactory.getLogger(BotServiceImpl.class);
@@ -148,14 +163,14 @@ public class BotServiceImpl implements BotService {
 
     /**
      * Главный метод для обработки входящих эндпоинтов. В методе происходит:<br>
-     * 1. определение эндпоинта -  он может быть в тексте сообщения {@code update.message()}
+     * 1. определение эндпоинта - он может быть в тексте сообщения {@code update.message()}
      * или в теле {@code update.callbackQuery()}<br>
      * 2. определение идентификатора чата {@code chatId}<br>
      * Проверяем, удалось ли распарсить эндпоинт<br>
      * Далее, если эндпоинт с логикой (т.е. под него существует константа),
      * то отрабатывает метод {@code showSpecificMenu()}
      * если нет, то с помощью метода {@code showFrontMenu(...)}
-     * вызываем простое фронт меню, энпоинты которого хранятся в базе
+     * вызываем простое фронт меню, эндпоинты которого хранятся в базе
      * 3. Если в {@code message} есть фотографии, то вызываем метод {@link #executeEndpointReportByPhoto(Message)}
      *
      * @param update полученный от сервера телеграмм объект Update
@@ -173,15 +188,21 @@ public class BotServiceImpl implements BotService {
             optionalCommand = Optional.ofNullable(message.text());
         } else {
             // если была текстовая команда
-            optionalCommand = Optional.of(callbackQuery.data());
             chatId = update.callbackQuery().message().chat().id();
+            optionalCommand = Optional.of(callbackQuery.data());
         }
 
         if (optionalCommand.isPresent()) {
             // если есть команда от кнопки или текстовая
             String endpointText = optionalCommand.get();
             if (!showSpecificMenu(chatId, endpointText)) {
-                showFrontEndAndMenu(chatId, endpointText);
+                // если не происходит передача контактных данных
+                if (message != null && (endpointText = message.text()) != null
+                        && (userService.findUserByChatIdOrCreateNew((chatId = message.chat().id())).getDialog()) != null) {
+                    executeEndpointGetContacts(chatId, endpointText);
+                } else {
+                    showFrontEndAndMenu(chatId, endpointText);
+                }
             }
         } else {
             if (message.photo() != null || message.document() != null) {
@@ -209,11 +230,11 @@ public class BotServiceImpl implements BotService {
                     // --- KEYBOARD ---
                     // лист для кнопок
                     List<InlineKeyboardButton> buttonList = new ArrayList<>();
-                    // получаем всех наследников текущего эндпойнта и для каждого наследника
+                    // получаем всех наследников текущего эндпоинта и для каждого наследника
                     endpoint.getChild().forEach(childEndpoint -> {
                         // создаем кнопку с текстовым заголовком childEndpoint.getTitle()
                         // назначаем кнопке команду (эндпоинт!), которая будет отправлена при нажатии
-                        // добавляем созданую кнопку в лист
+                        // добавляем созданную кнопку в лист
                         buttonList.add(
                                 new InlineKeyboardButton(childEndpoint.getTitle())
                                         .callbackData(childEndpoint.getEndpointText()));
@@ -258,9 +279,9 @@ public class BotServiceImpl implements BotService {
     }
 
     /**
-     * Метод для разбивки листа кнопок на строки с заданым в {@link #BUTTONS_IN_ROW} колчеством в строке
+     * Метод для разбивки листа кнопок на строки с заданным в {@link #BUTTONS_IN_ROW} количеством в строке
      *
-     * @param buttonList лист с кнопками, который нужно разбить. Или не нужно разбивать.
+     * @param buttonList Лист с кнопками, который нужно разбить. Или не нужно разбивать.
      * @return Клавиатуру {@code InlineKeyboardMarkup} с разбитыми по строкам кнопками
      */
     // ------------------- СОВСЕМ УРОДСКИЙ МЕТОД, ЧТО-ТО ПРИДУМАТЬ ДРУГОЕ -------------------
@@ -283,7 +304,7 @@ public class BotServiceImpl implements BotService {
 
     /**
      * Метод для обработки эндпоинтов в константах посредством обычного перебора.
-     * Если в списке константы отсутсвует искомый эндпоинт, то сразу вываливаемся из метода, чтобы не перебирать
+     * Если в списке констант отсутствует искомый эндпоинт, то сразу вываливаемся из метода, чтобы не перебирать
      *
      * @param chatId       идентификатор чата с пользователем
      * @param endpointText искомый эндпоинт
@@ -299,7 +320,7 @@ public class BotServiceImpl implements BotService {
             case ENDPOINT_START -> executeEndpointStart(chatId);
             case ENDPOINT_MAIN_MENU -> executeEndpointMainMenu(chatId, endpointText);
             case ENDPOINT_PRAY -> executeEndpointPray(chatId);
-            case ENDPOINT_GET_CONTACTS -> executeEndpointGetContacts(chatId);
+            case ENDPOINT_GET_CONTACTS -> executeEndpointGetContacts(chatId, endpointText);
             case ENDPOINT_REPORT_INFO -> executeEndpointReportInfo(chatId);
             case ENDPOINT_REPORT -> executeEndpointReportByText(chatId, endpointText);
             case ENDPOINT_VIOLATION -> executeEndpointViolation(chatId);
@@ -317,12 +338,12 @@ public class BotServiceImpl implements BotService {
     }
 
     /**
-     * Метод для отработки энпоинта {@link #ENDPOINT_START}
+     * Метод для отработки эндпоинта {@link #ENDPOINT_START}
      *
      * @param chatId - идентификатор чата с пользователем
      */
     private void executeEndpointStart(Long chatId) {
-        User user = userService.findUserByChatId(chatId);
+        User user = userService.findUserByChatIdOrCreateNew(chatId);
         if (user == null) {
             userService.save(new User(chatId));
         }
@@ -338,7 +359,7 @@ public class BotServiceImpl implements BotService {
     }
 
     /**
-     * Метод для отработки энпоинта {@link #ENDPOINT_MAIN_MENU}
+     * Метод для отработки эндпоинта {@link #ENDPOINT_MAIN_MENU}
      *
      * @param chatId - идентификатор чата с пользователем
      * @throws NoSuchElementException если пользователь не найден
@@ -358,7 +379,7 @@ public class BotServiceImpl implements BotService {
     }
 
     /**
-     * Метод для отработки энпоинта {@link #ENDPOINT_PRAY}
+     * Метод для отработки эндпоинта {@link #ENDPOINT_PRAY}
      *
      * @param chatId - идентификатор чата с пользователем
      */
@@ -371,15 +392,42 @@ public class BotServiceImpl implements BotService {
     }
 
     /**
-     * Метод для отработки энпоинта {@link #ENDPOINT_GET_CONTACTS}
+     * Метод для отработки эндпоинта {@link #ENDPOINT_GET_CONTACTS}
      *
      * @param chatId - идентификатор чата с пользователем
      */
-    private void executeEndpointGetContacts(Long chatId) {
+    private void executeEndpointGetContacts(Long chatId, String endpointText) {
+        User user = userService.findUserByChatIdOrCreateNew(chatId);
+        Dialog dialog = user.getDialog();
+
+        // если пользователь еще не оставил фио или номер телефона, то выводим запрос ФИО
+        if (dialog != Dialog.GET_CONTACTS_PHONE && dialog != Dialog.GET_CONTACTS_FULL_NAME) {
+            sendResponse(chatId, GET_CONTACTS_GREETINGS, null);
+            user.setDialog(Dialog.GET_CONTACTS_FULL_NAME);
+            userService.save(user);
+        } else {
+            switch (dialog) {
+                // если пользователь уже ввел ФИО, сохраняем фио и запрашиваем номер телефона
+                case GET_CONTACTS_FULL_NAME -> {
+                    user.setFullName(endpointText);
+                    user.setDialog(Dialog.GET_CONTACTS_PHONE);
+                    userService.save(user);
+                    sendResponse(chatId, GET_CONTACTS_PHONE, null);
+                }
+                // если пользователь ввел номер телефона, сохраняем номер телефона и показываем главное меню с выбором приюта
+                case GET_CONTACTS_PHONE -> {
+                    user.setDialog(null);
+                    user.setPhone(endpointText); // надо бы наверно парсить по формату
+                    userService.save(user);
+                    sendResponse(chatId, GET_CONTACTS_SUCCESS, null);
+                    executeEndpointStart(chatId);
+                }
+            }
+        }
     }
 
     /**
-     * Метод для отработки энпоинта {@link #ENDPOINT_REPORT_INFO}
+     * Метод для отработки эндпоинта {@link #ENDPOINT_REPORT_INFO}
      *
      * @param chatId - идентификатор чата с пользователем
      */
@@ -387,7 +435,7 @@ public class BotServiceImpl implements BotService {
     }
 
     /**
-     * Метод для отработки энпоинта {@link #ENDPOINT_REPORT}, если прислали фото
+     * Метод для отработки эндпоинта {@link #ENDPOINT_REPORT}, если прислали фото
      *
      * @param message - идентификатор чата с пользователем
      */
@@ -413,7 +461,7 @@ public class BotServiceImpl implements BotService {
         }
 
         Report report = reportService.saveReport(
-                userService.findUserByChatId(chatId),
+                userService.findUserByChatIdOrCreateNew(chatId),
                 message.caption(),
                 fileId
         );
@@ -433,14 +481,14 @@ public class BotServiceImpl implements BotService {
     }
 
     /**
-     * Метод для отработки энпоинта {@link #ENDPOINT_REPORT},
+     * Метод для отработки эндпоинта {@link #ENDPOINT_REPORT},
      * если прислана команда {@link #ENDPOINT_REPORT}
      *
      * @param chatId - идентификатор чата с пользователем
      */
     private void executeEndpointReportByText(Long chatId, String endpointText) {
         Report report = reportService.saveReport(
-                userService.findUserByChatId(chatId),
+                userService.findUserByChatIdOrCreateNew(chatId),
                 endpointText.replaceAll(ENDPOINT_REPORT, ""),
                 null
         );
@@ -458,7 +506,7 @@ public class BotServiceImpl implements BotService {
     }
 
     /**
-     * Метод для отработки энпоинта {@link #ENDPOINT_VIOLATION}
+     * Метод для отработки эндпоинта {@link #ENDPOINT_VIOLATION}
      *
      * @param chatId - идентификатор чата с пользователем
      */

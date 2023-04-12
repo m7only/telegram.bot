@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Сервисный класс для работы с сущностю {@link Report}
+ * Сервисный класс для работы с сущносьтю {@link Report}
  */
 @Service
 public class ReportServiceImpl implements ReportService {
