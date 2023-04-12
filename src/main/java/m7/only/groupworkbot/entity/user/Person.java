@@ -38,7 +38,7 @@ public abstract class Person {
     @Column(name = "chat_id")
     private Long chatId;
 
-    public Person(Long id) {
-        this.id = id;
+    public Person(Long chatId) {
+        this.chatId = chatId;
     }
 }

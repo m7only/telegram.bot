@@ -101,7 +101,7 @@ public class User extends Person {
     @ToString.Exclude
     private Set<Report> reports;
 
-    public User(Long id) {
-        super(id);
+    public User(Long chatId) {
+        super(chatId);
     }
 }
