@@ -4,10 +4,8 @@ import m7.only.groupworkbot.entity.report.Report;
 import m7.only.groupworkbot.entity.user.User;
 import m7.only.groupworkbot.repository.UserRepository;
 import m7.only.groupworkbot.services.ScheduledService;
-import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -23,16 +21,18 @@ import java.util.stream.Collectors;
 @EnableScheduling
 public class ScheduledServiceImpl implements ScheduledService {
 
-    private final String DAILY_REMINDER_MESSAGE = "Напоминаем вам о необходимости отправки ежедневного отчета. " +
+    // ----- FEEDBACK CONSTANT -----
+    private static final String DAILY_REMINDER_MESSAGE = "Напоминаем вам о необходимости отправки ежедневного отчета. " +
             "Если вы еще не присылали отчёт, то сейчас самое время";
-    private final String USER_WITHOUT_REPORTS_MESSAGE = "Отсутствуют отчеты за последние два дня";
-    private final String CONGRATULATION_MESSAGE = "Поздравляем с успешным окончанием испытательного срока";
-    private final String SEND_EXTEND_TRIAL_MESSAGE = "Вам назначен дополнительный период";
-    private final String SEND_FAILYRE_MESSAGE = "Испытательный срок провален";
-    private final String TRIAL_SUCCESS_MESSAGE = "Закончился испытательный срок";
+    private static final String USER_WITHOUT_REPORTS_MESSAGE = "Отсутствуют отчеты за последние два дня";
+    private static final String CONGRATULATION_MESSAGE = "Поздравляем с успешным окончанием испытательного срока";
+    private static final String SEND_EXTEND_TRIAL_MESSAGE = "Вам назначен дополнительный период";
+    private static final String SEND_FAILURE_MESSAGE = "Испытательный срок провален";
+    private static final String TRIAL_SUCCESS_MESSAGE = "Закончился испытательный срок";
+    // ----- FEEDBACK CONSTANT -----
 
-    private UserRepository userRepository;
-    private BotServiceImpl botService;
+    private final UserRepository userRepository;
+    private final BotServiceImpl botService;
 
     public ScheduledServiceImpl(UserRepository userRepository, BotServiceImpl botService) {
         this.userRepository = userRepository;
@@ -81,8 +81,8 @@ public class ScheduledServiceImpl implements ScheduledService {
                 .flatMap(e -> e.getReports()
                         .stream()
                         .filter(report ->
-                                (report.getReportDate().equals(today)
-                                        && report.getReportDate().equals(today.minusDays(1)))))
+                                (report.getReportDate().toLocalDate().equals(today)
+                                        && report.getReportDate().toLocalDate().equals(today.minusDays(1)))))
                         .collect(Collectors.toList());
 
         reports.forEach(report -> {
@@ -148,7 +148,7 @@ public class ScheduledServiceImpl implements ScheduledService {
                 .filter(User::getTrialFailure)
                 .peek(e -> {
                     if(!e.getTrialFailureInformed()) {
-                        botService.sendResponse(e.getChatId(), SEND_FAILYRE_MESSAGE, null);
+                        botService.sendResponse(e.getChatId(), SEND_FAILURE_MESSAGE, null);
                         e.setTrialFailureInformed(true);
                     }
                 })
