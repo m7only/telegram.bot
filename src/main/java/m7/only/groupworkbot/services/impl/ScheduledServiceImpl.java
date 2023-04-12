@@ -33,13 +33,12 @@ public class ScheduledServiceImpl implements ScheduledService {
 
     private final UserRepository userRepository;
     private final BotServiceImpl botService;
+    private List<User> users = new ArrayList<>();
 
     public ScheduledServiceImpl(UserRepository userRepository, BotServiceImpl botService) {
         this.userRepository = userRepository;
         this.botService = botService;
     }
-
-    private  List<User> users = new ArrayList<>();
 
     /**
      * Ежедневно получаем из базы всех усыновителей и производим необходимые проверки в методах
@@ -139,7 +138,7 @@ public class ScheduledServiceImpl implements ScheduledService {
      * установлен ли флаг {@code User.trialFailure} о провале испытательного срока
      * и флаг {@code User.trialFailureInformed} информирования об этом.
      * Если флаг провала стоит и усыновитель не проинформирован, то информируем его,
-     * отправляем стандартное сообщение с дальнейшими действиями и устанавливаем флаг информировнаия
+     * отправляем стандартное сообщение с дальнейшими действиями и устанавливаем флаг информирования
      *
      * @param users лист со всеми пользователями
      */
@@ -156,7 +155,7 @@ public class ScheduledServiceImpl implements ScheduledService {
     }
 
     /**
-     * При ежедневном проходе по всем усыновителям проверяем закончился ли истытательный срок.
+     * При ежедневном проходе по всем усыновителям проверяем закончился ли испытательный срок.
      * Если испытательный срок вышел, и флаг {@code User.trialSuccess} не установлен,
      * то отправляем запрос волонтеру о необходимости принятия решения по усыновителю
      *

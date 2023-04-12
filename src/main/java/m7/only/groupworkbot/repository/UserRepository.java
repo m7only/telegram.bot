@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Репозиторий сущности User
+ * Репозиторий сущности {@linkplain User User}
  */
 public interface UserRepository extends JpaRepository<User, Long> {
     /**

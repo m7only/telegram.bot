@@ -57,7 +57,7 @@ public class AnimalShelter {
     private String securityRules;
 
     /**
-     * Техника безопаности в приюте
+     * Техника безопасности в приюте
      */
     @Column(name = "safety_rules")
     private String safetyRules;

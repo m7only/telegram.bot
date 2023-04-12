@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 /**
- * Репозиторий для сущности Endpoint
+ * Репозиторий сущности {@linkplain Endpoint Endpoint}
  */
 public interface EndpointRepository extends JpaRepository<Endpoint, Long> {
     Optional<Endpoint> findByEndpointText(String endpoint_text);
