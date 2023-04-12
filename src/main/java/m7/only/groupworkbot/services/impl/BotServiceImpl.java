@@ -28,6 +28,8 @@ import java.util.*;
  */
 @Service
 public class BotServiceImpl implements BotService {
+
+    // ----- FEEDBACK CONSTANT -----
     /**
      * Текст привествия пользователя в эндпоинте "/start"
      */
@@ -62,6 +64,7 @@ public class BotServiceImpl implements BotService {
      * Сообщение об успешном отчете: в отчете за текущие сутки есть описание и хотя бы одна фотография.
      */
     private static final String REPORT_FULL_SUCCESS = "Отчет за сегодня полностью сформирован.";
+    // ----- FEEDBACK CONSTANT -----
 
     // ----- ENDPOINTS CONSTANT -----
     /**
@@ -118,9 +121,12 @@ public class BotServiceImpl implements BotService {
             ENDPOINT_VIOLATION
     );
     // ----- ENDPOINTS CONSTANT -----
+
+    // ----- SETTINGS CONSTANT -----
     /**
      * Количество кнопок в одной строке
      */
+    // ----- SETTINGS CONSTANT -----
     private static final int BUTTONS_IN_ROW = 2;
 
 
@@ -175,7 +181,6 @@ public class BotServiceImpl implements BotService {
             String endpointText = optionalCommand.get();
             if (!showSpecificMenu(chatId, endpointText)) {
                 showFrontEndAndMenu(chatId, endpointText);
-//                showFrontEndAndMenu(message, endpointText);
             }
         } else {
             if (message.photo() != null || message.document() != null) {
