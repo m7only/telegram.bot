@@ -57,35 +57,35 @@ public class InitData {
         Endpoint mainMenu_cat = new Endpoint("/mainMenu_CAT",
                 "Кошки",
                 "Выберите, пожалуйста, дальнейшее действие.",
-                animalShelterRepository.findById(1L).get(),
+                animalShelterRepository.findById(1L).orElseThrow(),
                 null);
         // этап 0
         Endpoint shelterInfoMenu_CAT = new Endpoint(
                 "/shelterInfoMenu_CAT",
-                "О приют для кошек",
+                "О приюте для кошек",
                 "Вы находитесь в меню приюта для кошек, выберите пожалуйста действие.",
-                animalShelterRepository.findById(1L).get(),
+                animalShelterRepository.findById(1L).orElseThrow(),
                 mainMenu_cat
         );
         Endpoint howToMenu_CAT = new Endpoint(
                 "/aloha_CAT",
                 "Как взять животное",
                 "В данном разделе мы расскажем, как подготовиться ко встрече с новым членом семьи",
-                animalShelterRepository.findById(1L).get(),
+                animalShelterRepository.findById(1L).orElseThrow(),
                 mainMenu_cat
         );
         Endpoint reportInfo_CAT = new Endpoint(
                 "/reportInfo_CAT",
                 "Отправить отчет",
                 "В данном разделе вы можете отправить отчет по ввереному вам котику.",
-                animalShelterRepository.findById(1L).get(),
+                animalShelterRepository.findById(1L).orElseThrow(),
                 mainMenu_cat
         );
         Endpoint start = new Endpoint(
                 "/start",
                 "Назад, к приютам",
                 "",
-                animalShelterRepository.findById(1L).get(),
+                animalShelterRepository.findById(1L).orElseThrow(),
                 mainMenu_cat
         );
         // этап 0
@@ -94,56 +94,56 @@ public class InitData {
                 "/introduce_CAT",
                 "Знакомство с котиком",
                 "Животное нужно прикормить, дать обнюхать себя, дать время, чтобы КОТЭ привыкло к вашему присутствию.",
-                animalShelterRepository.findById(1L).get(),
+                animalShelterRepository.findById(1L).orElseThrow(),
                 howToMenu_CAT
         );
         Endpoint documents_CAT = new Endpoint(
                 "/documents_CAT",
                 "Документы",
                 "Чтобы мы могли отдать вам животное вам нужно подготовить справку об отсутствии аллергии на кошек у всех членов вашей семьи и знакомы. Так же от них нужна справка от наркоголога и психиатра о том, что они не состоят на учете. Рекомендуем пройти военно-летную комиссию, уход за котиком это большая ответственность!",
-                animalShelterRepository.findById(1L).get(),
+                animalShelterRepository.findById(1L).orElseThrow(),
                 howToMenu_CAT
         );
         Endpoint transport_CAT = new Endpoint(
                 "/transport_CAT",
                 "Транспортировка",
                 "Никаких гробов для котиков! Максимум шлейка!",
-                animalShelterRepository.findById(1L).get(),
+                animalShelterRepository.findById(1L).orElseThrow(),
                 howToMenu_CAT
         );
         Endpoint cub_CAT = new Endpoint(
                 "/cub_CAT",
                 "Дом для котенка",
                 "Изначально котенку хватит 20-30 кв.м. без учета остальных членов семьи.",
-                animalShelterRepository.findById(1L).get(),
+                animalShelterRepository.findById(1L).orElseThrow(),
                 howToMenu_CAT
         );
         Endpoint adult_CAT = new Endpoint(
                 "/adult_CAT",
                 "Дом для котика",
                 "Взрослому котику необходима большая площадь, расчитывайте примерно 30 кв.м. на каждого члена семьи + 50 кв.м. для одного котика.",
-                animalShelterRepository.findById(1L).get(),
+                animalShelterRepository.findById(1L).orElseThrow(),
                 howToMenu_CAT
         );
         Endpoint disabled_CAT = new Endpoint(
                 "/disabled_CAT",
                 "Котик-ивналид",
                 "Котику с ограниченными возможностями необходим постоянный, круглосуточный уход. Мы рекомендуем нанять несколько сиделок для круглосуточного удовлетворения потребностей котика.",
-                animalShelterRepository.findById(1L).get(),
+                animalShelterRepository.findById(1L).orElseThrow(),
                 howToMenu_CAT
         );
         Endpoint reasonOfRefusal_CAT = new Endpoint(
                 "/reasonOfRefusal_CAT",
                 "Причины отказа",
                 "Не выдаем животных дебилам, наркоманам, алергикам.",
-                animalShelterRepository.findById(1L).get(),
+                animalShelterRepository.findById(1L).orElseThrow(),
                 howToMenu_CAT
         );
         Endpoint getContacts_CAT = new Endpoint(
-                "/getContacts",
-                "Оставьте свои данные.",
-                "Не выдаем животных дебилам, наркоманам, алергикам.",
-                animalShelterRepository.findById(1L).get(),
+                "/getContacts_CAT",
+                "Оставьте свои данные",
+                "",
+                animalShelterRepository.findById(1L).orElseThrow(),
                 howToMenu_CAT
         );
 
@@ -153,36 +153,36 @@ public class InitData {
         Endpoint aboutShelter_CAT = new Endpoint(
                 "/aboutShelter_CAT",
                 "О приюте",
-                animalShelterRepository.findById(1L).get().getAbout(),
-                animalShelterRepository.findById(1L).get(),
+                animalShelterRepository.findById(1L).orElseThrow().getAbout(),
+                animalShelterRepository.findById(1L).orElseThrow(),
                 shelterInfoMenu_CAT
         );
         Endpoint contactsShelter_CAT = new Endpoint(
                 "/contacts_CAT",
                 "Контакты приюта",
-                animalShelterRepository.findById(1L).get().getContacts(),
-                animalShelterRepository.findById(1L).get(),
+                animalShelterRepository.findById(1L).orElseThrow().getContacts(),
+                animalShelterRepository.findById(1L).orElseThrow(),
                 shelterInfoMenu_CAT
         );
         Endpoint securityShelter_CAT = new Endpoint(
                 "/security_CAT",
                 "Контакты охраны",
-                animalShelterRepository.findById(1L).get().getSecurityRules(),
-                animalShelterRepository.findById(1L).get(),
+                animalShelterRepository.findById(1L).orElseThrow().getSecurityRules(),
+                animalShelterRepository.findById(1L).orElseThrow(),
                 shelterInfoMenu_CAT
         );
         Endpoint safetyShelter_CAT = new Endpoint(
                 "/safety_CAT",
                 "Правила безопасности",
-                animalShelterRepository.findById(1L).get().getSafetyRules(),
-                animalShelterRepository.findById(1L).get(),
+                animalShelterRepository.findById(1L).orElseThrow().getSafetyRules(),
+                animalShelterRepository.findById(1L).orElseThrow(),
                 shelterInfoMenu_CAT
         );
         Endpoint pray_CAT = new Endpoint(
                 "/pray",
                 "Обратиться к волонтеру",
-                animalShelterRepository.findById(1L).get().getSafetyRules(),
-                animalShelterRepository.findById(1L).get(),
+                animalShelterRepository.findById(1L).orElseThrow().getSafetyRules(),
+                animalShelterRepository.findById(1L).orElseThrow(),
                 shelterInfoMenu_CAT
         );
 
@@ -196,28 +196,28 @@ public class InitData {
         Endpoint mainMenu_DOG = new Endpoint("/mainMenu_DOG",
                 "Собаки",
                 "Выберите, пожалуйста, дальнейшее действие.",
-                animalShelterRepository.findById(2L).get(),
+                animalShelterRepository.findById(2L).orElseThrow(),
                 null);
         // этап 0
         Endpoint shelterInfoMenu_DOG = new Endpoint(
                 "/shelterInfoMenu_DOG",
                 "О приюте для собак",
                 "Вы находитесь в меню приюта для собак, выберите пожалуйста действие.",
-                animalShelterRepository.findById(2L).get(),
+                animalShelterRepository.findById(2L).orElseThrow(),
                 mainMenu_DOG
         );
         Endpoint howToMenu_DOG = new Endpoint(
                 "/aloha_DOG",
                 "Как взять собаку",
                 "В данном разделе мы расскажем, как подготовиться ко встрече с новым членом семьи",
-                animalShelterRepository.findById(2L).get(),
+                animalShelterRepository.findById(2L).orElseThrow(),
                 mainMenu_DOG
         );
         Endpoint reportInfo_DOG = new Endpoint(
                 "/reportInfo_DOG",
                 "Отправить отчет",
                 "В данном разделе вы можете отправить отчет по ввереной вам собаке.",
-                animalShelterRepository.findById(2L).get(),
+                animalShelterRepository.findById(2L).orElseThrow(),
                 mainMenu_DOG
         );
 
@@ -225,7 +225,7 @@ public class InitData {
                 "/start",
                 "Назад, к приютам",
                 "",
-                animalShelterRepository.findById(2L).get(),
+                animalShelterRepository.findById(2L).orElseThrow(),
                 mainMenu_DOG
         );
         // этап 0
@@ -234,70 +234,70 @@ public class InitData {
                 "/introduce_DOG",
                 "Знакомство с собакой",
                 "Животное нужно прикормить, дать обнюхать себя, дать время, чтобы ПСЭ привыкло к вашему присутствию.",
-                animalShelterRepository.findById(2L).get(),
+                animalShelterRepository.findById(2L).orElseThrow(),
                 howToMenu_DOG
         );
         Endpoint documents_DOG = new Endpoint(
                 "/documents_DOG",
                 "Документы",
                 "Чтобы мы могли отдать вам СОБАКЕНА вам нужно подготовить справку об отсутствии аллергии на СОБАКЕНОВ у всех членов вашей семьи и знакомых. Так же от них нужна справка от наркоголога и психиатра о том, что они не состоят на учете. Рекомендуем пройти военно-летную комиссию, уход за котиком это большая ответственность!",
-                animalShelterRepository.findById(2L).get(),
+                animalShelterRepository.findById(2L).orElseThrow(),
                 howToMenu_DOG
         );
         Endpoint transport_DOG = new Endpoint(
                 "/transport_DOG",
                 "Транспортировка",
                 "Поводок, намордник, металлическая клетка с прутком из кругляка стали 15-25 мм",
-                animalShelterRepository.findById(2L).get(),
+                animalShelterRepository.findById(2L).orElseThrow(),
                 howToMenu_DOG
         );
         Endpoint cub_DOG = new Endpoint(
                 "/cub_DOG",
                 "Дом для щенка",
                 "Изначально собакену хватит будки 0,5 кв.м. без учета остальных членов семьи.",
-                animalShelterRepository.findById(2L).get(),
+                animalShelterRepository.findById(2L).orElseThrow(),
                 howToMenu_DOG
         );
         Endpoint adult_DOG = new Endpoint(
                 "/adult_DOG",
                 "Дом для собаки",
                 "Взрослой собаке необходима площадь, немногим больше, чем для щенка. Расчитывайте примерно 10 кв.м. на каждого члена семьи и + 0,7 кв.м. для одной собаки.",
-                animalShelterRepository.findById(2L).get(),
+                animalShelterRepository.findById(2L).orElseThrow(),
                 howToMenu_DOG
         );
         Endpoint disabled_DOG = new Endpoint(
                 "/disabled_DOG",
                 "Собака-инвалид",
                 "Собаке с ограниченными возможностями необходим постоянный, круглосуточный уход. Мы рекомендуем нанять несколько сиделок для круглосуточного удовлетворения потребностей собакена.",
-                animalShelterRepository.findById(2L).get(),
+                animalShelterRepository.findById(2L).orElseThrow(),
                 howToMenu_DOG
         );
         Endpoint reasonOfRefusal_DOG = new Endpoint(
                 "/reasonOfRefusal_DOG",
                 "Причины отказа",
                 "Не выдаем животных дебилам, наркоманам, алергикам.",
-                animalShelterRepository.findById(2L).get(),
+                animalShelterRepository.findById(2L).orElseThrow(),
                 howToMenu_DOG
         );
         Endpoint cynologistAdvice_DOG = new Endpoint(
                 "/cynologistAdvice_DOG",
                 "Совет кинолога",
                 "Ну тут кинолог советует не бить, а дрессировать.",
-                animalShelterRepository.findById(2L).get(),
+                animalShelterRepository.findById(2L).orElseThrow(),
                 howToMenu_DOG
         );
         Endpoint cynologist_DOG = new Endpoint(
                 "/cynologist_DOG",
                 "Наши кинологи",
                 "Вот вам контакты супермега пупер кинологов",
-                animalShelterRepository.findById(2L).get(),
+                animalShelterRepository.findById(2L).orElseThrow(),
                 howToMenu_DOG
         );
         Endpoint getContacts_DOG = new Endpoint(
-                "/getContacts",
-                "Оставьте свои данные.",
+                "/getContacts_DOG",
+                "Оставьте свои данные",
                 "",
-                animalShelterRepository.findById(2L).get(),
+                animalShelterRepository.findById(2L).orElseThrow(),
                 howToMenu_DOG
         );
 
@@ -307,36 +307,36 @@ public class InitData {
         Endpoint aboutShelter_DOG = new Endpoint(
                 "/aboutShelter_DOG",
                 "О приюте",
-                animalShelterRepository.findById(2L).get().getAbout(),
-                animalShelterRepository.findById(2L).get(),
+                animalShelterRepository.findById(2L).orElseThrow().getAbout(),
+                animalShelterRepository.findById(2L).orElseThrow(),
                 shelterInfoMenu_DOG
         );
         Endpoint contactsShelter_DOG = new Endpoint(
                 "/contacts_DOG",
                 "Контакты приюта",
-                animalShelterRepository.findById(2L).get().getContacts(),
-                animalShelterRepository.findById(2L).get(),
+                animalShelterRepository.findById(2L).orElseThrow().getContacts(),
+                animalShelterRepository.findById(2L).orElseThrow(),
                 shelterInfoMenu_DOG
         );
         Endpoint securityShelter_DOG = new Endpoint(
                 "/security_DOG",
                 "Контакты охраны",
-                animalShelterRepository.findById(2L).get().getSecurityRules(),
-                animalShelterRepository.findById(2L).get(),
+                animalShelterRepository.findById(2L).orElseThrow().getSecurityRules(),
+                animalShelterRepository.findById(2L).orElseThrow(),
                 shelterInfoMenu_DOG
         );
         Endpoint safetyShelter_DOG = new Endpoint(
                 "/safety_DOG",
                 "Правила безопасности",
-                animalShelterRepository.findById(2L).get().getSafetyRules(),
-                animalShelterRepository.findById(2L).get(),
+                animalShelterRepository.findById(2L).orElseThrow().getSafetyRules(),
+                animalShelterRepository.findById(2L).orElseThrow(),
                 shelterInfoMenu_DOG
         );
         Endpoint pray_DOG = new Endpoint(
                 "/pray",
                 "Обратиться к волонтеру",
-                animalShelterRepository.findById(2L).get().getSafetyRules(),
-                animalShelterRepository.findById(2L).get(),
+                animalShelterRepository.findById(2L).orElseThrow().getSafetyRules(),
+                animalShelterRepository.findById(2L).orElseThrow(),
                 shelterInfoMenu_DOG
         );
 

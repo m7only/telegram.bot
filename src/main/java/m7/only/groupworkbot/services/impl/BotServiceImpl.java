@@ -11,6 +11,7 @@ import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.SendResponse;
 import m7.only.groupworkbot.entity.Endpoint;
 import m7.only.groupworkbot.entity.report.Report;
+import m7.only.groupworkbot.entity.user.Dialog;
 import m7.only.groupworkbot.entity.user.User;
 import m7.only.groupworkbot.services.*;
 import org.slf4j.Logger;
@@ -64,6 +65,20 @@ public class BotServiceImpl implements BotService {
      * Сообщение об успешном отчете: в отчете за текущие сутки есть описание и хотя бы одна фотография.
      */
     private static final String REPORT_FULL_SUCCESS = "Отчет за сегодня полностью сформирован.";
+
+    /**
+     * Сообщение при первом входе в эндпоинт {@link  #ENDPOINT_GET_CONTACTS}. Вводится ФИО.
+     */
+    private static final String GET_CONTACTS_GREETINGS = "Сейчас вы можете оставить или изменить свои контактные данные. Введите свои ФИО.";
+
+    /**
+     * Сообщение при втором входе в эндпоинт {@link  #ENDPOINT_GET_CONTACTS}. Вводится номер телефона.
+     */
+    private static final String GET_CONTACTS_PHONE = "Введите номер своего телефона.";
+    /**
+     * Сообщение при третьем входе в эндпоинт {@link  #ENDPOINT_GET_CONTACTS}. Успешный ввод данных.
+     */
+    private static final String GET_CONTACTS_SUCCESS = "Контактные данные сохранены.";
     // ----- FEEDBACK CONSTANT -----
 
 
@@ -84,7 +99,7 @@ public class BotServiceImpl implements BotService {
     private static final String ENDPOINT_PRAY = "/pray";
 
     /**
-     * Заголовок для энпоинта вызова волонтера,
+     * Заголовок для энпоинта вызова волонтера {@link #ENDPOINT_PRAY},
      * для формирования кнопки, которая используется в нескольких местах
      */
     private static final String ENDPOINT_PRAY_TITLE = "Обратиться к волонтеру";
@@ -127,8 +142,8 @@ public class BotServiceImpl implements BotService {
     /**
      * Количество кнопок в одной строке
      */
-    // ----- SETTINGS CONSTANT -----
     private static final int BUTTONS_IN_ROW = 2;
+    // ----- SETTINGS CONSTANT -----
 
 
     private final Logger logger = LoggerFactory.getLogger(BotServiceImpl.class);
@@ -173,15 +188,21 @@ public class BotServiceImpl implements BotService {
             optionalCommand = Optional.ofNullable(message.text());
         } else {
             // если была текстовая команда
-            optionalCommand = Optional.of(callbackQuery.data());
             chatId = update.callbackQuery().message().chat().id();
+            optionalCommand = Optional.of(callbackQuery.data());
         }
 
         if (optionalCommand.isPresent()) {
             // если есть команда от кнопки или текстовая
             String endpointText = optionalCommand.get();
             if (!showSpecificMenu(chatId, endpointText)) {
-                showFrontEndAndMenu(chatId, endpointText);
+                // если не происходит передача контактных данных
+                if (message != null && (endpointText = message.text()) != null
+                        && (userService.findUserByChatIdOrCreateNew((chatId = message.chat().id())).getDialog()) != null) {
+                    executeEndpointGetContacts(chatId, endpointText);
+                } else {
+                    showFrontEndAndMenu(chatId, endpointText);
+                }
             }
         } else {
             if (message.photo() != null || message.document() != null) {
@@ -299,7 +320,7 @@ public class BotServiceImpl implements BotService {
             case ENDPOINT_START -> executeEndpointStart(chatId);
             case ENDPOINT_MAIN_MENU -> executeEndpointMainMenu(chatId, endpointText);
             case ENDPOINT_PRAY -> executeEndpointPray(chatId);
-            case ENDPOINT_GET_CONTACTS -> executeEndpointGetContacts(chatId);
+            case ENDPOINT_GET_CONTACTS -> executeEndpointGetContacts(chatId, endpointText);
             case ENDPOINT_REPORT_INFO -> executeEndpointReportInfo(chatId);
             case ENDPOINT_REPORT -> executeEndpointReportByText(chatId, endpointText);
             case ENDPOINT_VIOLATION -> executeEndpointViolation(chatId);
@@ -322,7 +343,7 @@ public class BotServiceImpl implements BotService {
      * @param chatId - идентификатор чата с пользователем
      */
     private void executeEndpointStart(Long chatId) {
-        User user = userService.findUserByChatId(chatId);
+        User user = userService.findUserByChatIdOrCreateNew(chatId);
         if (user == null) {
             userService.save(new User(chatId));
         }
@@ -375,7 +396,34 @@ public class BotServiceImpl implements BotService {
      *
      * @param chatId - идентификатор чата с пользователем
      */
-    private void executeEndpointGetContacts(Long chatId) {
+    private void executeEndpointGetContacts(Long chatId, String endpointText) {
+        User user = userService.findUserByChatIdOrCreateNew(chatId);
+        Dialog dialog = user.getDialog();
+
+        // если пользователь еще не оставил фио или номер телефона, то выводим запрос ФИО
+        if (dialog != Dialog.GET_CONTACTS_PHONE && dialog != Dialog.GET_CONTACTS_FULL_NAME) {
+            sendResponse(chatId, GET_CONTACTS_GREETINGS, null);
+            user.setDialog(Dialog.GET_CONTACTS_FULL_NAME);
+            userService.save(user);
+        } else {
+            switch (dialog) {
+                // если пользователь уже ввел ФИО, сохраняем фио и запрашиваем номер телефона
+                case GET_CONTACTS_FULL_NAME -> {
+                    user.setFullName(endpointText);
+                    user.setDialog(Dialog.GET_CONTACTS_PHONE);
+                    userService.save(user);
+                    sendResponse(chatId, GET_CONTACTS_PHONE, null);
+                }
+                // если пользователь ввел номер телефона, сохраняем номер телефона и показываем главное меню с выбором приюта
+                case GET_CONTACTS_PHONE -> {
+                    user.setDialog(null);
+                    user.setPhone(endpointText); // надо бы наврно парсить по формату
+                    userService.save(user);
+                    sendResponse(chatId, GET_CONTACTS_SUCCESS, null);
+                    executeEndpointStart(chatId);
+                }
+            }
+        }
     }
 
     /**
@@ -413,7 +461,7 @@ public class BotServiceImpl implements BotService {
         }
 
         Report report = reportService.saveReport(
-                userService.findUserByChatId(chatId),
+                userService.findUserByChatIdOrCreateNew(chatId),
                 message.caption(),
                 fileId
         );
@@ -440,7 +488,7 @@ public class BotServiceImpl implements BotService {
      */
     private void executeEndpointReportByText(Long chatId, String endpointText) {
         Report report = reportService.saveReport(
-                userService.findUserByChatId(chatId),
+                userService.findUserByChatIdOrCreateNew(chatId),
                 endpointText.replaceAll(ENDPOINT_REPORT, ""),
                 null
         );

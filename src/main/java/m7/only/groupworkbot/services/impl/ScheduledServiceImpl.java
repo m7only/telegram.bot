@@ -83,11 +83,11 @@ public class ScheduledServiceImpl implements ScheduledService {
                         .filter(report ->
                                 (report.getReportDate().toLocalDate().equals(today)
                                         && report.getReportDate().toLocalDate().equals(today.minusDays(1)))))
-                        .collect(Collectors.toList());
+                .toList();
 
         reports.forEach(report -> {
-                    botService.sendResponse(report.getUser().getVolunteer().getChatId(), USER_WITHOUT_REPORTS_MESSAGE + report.getUser(), null);
-                });
+            botService.sendResponse(report.getUser().getVolunteer().getChatId(), USER_WITHOUT_REPORTS_MESSAGE + report.getUser(), null);
+        });
     }
 
 
@@ -103,7 +103,7 @@ public class ScheduledServiceImpl implements ScheduledService {
         users.stream()
                 .filter(User::getTrialSuccess)
                 .peek(e -> {
-                    if(!e.getTrialSuccessInformed()) {
+                    if (!e.getTrialSuccessInformed()) {
                         botService.sendResponse(e.getChatId(), CONGRATULATION_MESSAGE, null);
                         e.setTrialSuccessInformed(true);
                     }
@@ -126,7 +126,7 @@ public class ScheduledServiceImpl implements ScheduledService {
         users.stream()
                 .filter(User::getTrialExtended)
                 .peek(e -> {
-                    if(!e.getTrialExtendedInformed()) {
+                    if (!e.getTrialExtendedInformed()) {
                         botService.sendResponse(e.getChatId(), SEND_EXTEND_TRIAL_MESSAGE, null);
                         e.setTrialExtendedInformed(true);
                     }
@@ -147,7 +147,7 @@ public class ScheduledServiceImpl implements ScheduledService {
         users.stream()
                 .filter(User::getTrialFailure)
                 .peek(e -> {
-                    if(!e.getTrialFailureInformed()) {
+                    if (!e.getTrialFailureInformed()) {
                         botService.sendResponse(e.getChatId(), SEND_FAILURE_MESSAGE, null);
                         e.setTrialFailureInformed(true);
                     }
@@ -166,7 +166,7 @@ public class ScheduledServiceImpl implements ScheduledService {
         users.stream()
                 .filter(User::getTrialSuccess)
                 .peek(e -> {
-                    if(!e.getTrialSuccess()) {
+                    if (!e.getTrialSuccess()) {
                         botService.sendResponse(e.getVolunteer().getChatId(), TRIAL_SUCCESS_MESSAGE + e, null);
                     }
                 })
