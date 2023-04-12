@@ -64,6 +64,8 @@ public class BotServiceImpl implements BotService {
      * Сообщение об успешном отчете: в отчете за текущие сутки есть описание и хотя бы одна фотография.
      */
     private static final String REPORT_FULL_SUCCESS = "Отчет за сегодня полностью сформирован.";
+
+
     // ----- FEEDBACK CONSTANT -----
 
 
@@ -122,7 +124,6 @@ public class BotServiceImpl implements BotService {
             ENDPOINT_VIOLATION
     );
     // ----- ENDPOINTS CONSTANT -----
-
 
     // ----- SETTINGS CONSTANT -----
     /**
@@ -183,6 +184,7 @@ public class BotServiceImpl implements BotService {
             String endpointText = optionalCommand.get();
             if (!showSpecificMenu(chatId, endpointText)) {
                 showFrontEndAndMenu(chatId, endpointText);
+//                showFrontEndAndMenu(message, endpointText);
             }
         } else {
             if (message.photo() != null || message.document() != null) {
@@ -427,8 +429,7 @@ public class BotServiceImpl implements BotService {
             sendResponse(chatId, REPORT_TEXT_SUCCESS, null);
         }
 
-        if ((report.getReport() != null && !report.getReport().isBlank())
-                && (report.getPhotos() != null && report.getPhotos().size() != 0)) {
+        if ((report.getReport() != null && !report.getReport().isBlank()) && (report.getPhotos() != null && report.getPhotos().size() != 0)) {
             sendResponse(chatId, REPORT_FULL_SUCCESS, null);
             executeEndpointStart(chatId);
         }
@@ -453,9 +454,7 @@ public class BotServiceImpl implements BotService {
             sendResponse(chatId, REPORT_PHOTO_SUCCESS, null);
         }
 
-        if (report.getReport() != null
-                && (report.getReport() != null
-                && report.getPhotos().size() != 0)) {
+        if (report.getReport() != null && (report.getReport() != null && report.getPhotos().size() != 0)) {
             sendResponse(chatId, REPORT_FULL_SUCCESS, null);
             executeEndpointStart(chatId);
         }
