@@ -64,8 +64,6 @@ public class BotServiceImpl implements BotService {
      * Сообщение об успешном отчете: в отчете за текущие сутки есть описание и хотя бы одна фотография.
      */
     private static final String REPORT_FULL_SUCCESS = "Отчет за сегодня полностью сформирован.";
-
-
     // ----- FEEDBACK CONSTANT -----
 
 
@@ -184,7 +182,6 @@ public class BotServiceImpl implements BotService {
             String endpointText = optionalCommand.get();
             if (!showSpecificMenu(chatId, endpointText)) {
                 showFrontEndAndMenu(chatId, endpointText);
-//                showFrontEndAndMenu(message, endpointText);
             }
         } else {
             if (message.photo() != null || message.document() != null) {
