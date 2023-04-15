@@ -84,6 +84,11 @@ public class BotServiceImpl implements BotService {
      * Сообщение при третьем входе в эндпоинт {@link  #ENDPOINT_GET_CONTACTS}. Успешный ввод данных.
      */
     private static final String GET_CONTACTS_SUCCESS = "Контактные данные сохранены.";
+
+    /**
+     *  Сообщение, объясняющее пользователю, как отправить отчет.
+     */
+    private static final String REPORT_INFO = "Для отправки отчета просто пришлите нам фотографию, в подписи которой опишите состояние животного: его рацион, самочувствие, как привыкает к новому месту, а так же приобретенные новые привычки. Фото и описание обязательны. Если вы отправили фотографию, но забыли описать состояние животного, ничего страшного: можете прислать еще одну фотографию или перед текстом сообщения поставьте команду \"/report \", например: \"/report Животное чувствует себя ...\"";
     // ----- FEEDBACK CONSTANT -----
 
 
@@ -440,6 +445,7 @@ public class BotServiceImpl implements BotService {
      * @param chatId - идентификатор чата с пользователем
      */
     private void executeEndpointReportInfo(Long chatId) {
+        sendResponse(chatId, REPORT_INFO, null);
     }
 
     /**
