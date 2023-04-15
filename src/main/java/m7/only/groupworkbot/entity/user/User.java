@@ -1,7 +1,10 @@
 package m7.only.groupworkbot.entity.user;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import m7.only.groupworkbot.entity.report.Report;
 import m7.only.groupworkbot.entity.shelter.AnimalShelter;
@@ -13,7 +16,6 @@ import java.util.Set;
  * Класс сущности пользователя (усыновителя)
  */
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
 @EqualsAndHashCode(callSuper = true)
@@ -107,5 +109,22 @@ public class User extends Person {
 
     public User(Long chatId) {
         super(chatId);
+    }
+
+    public User(Long id, String fullName, String phone, Long chatId, Boolean stepParent, LocalDate trialStart, Integer trialPeriod, Boolean trialExtended, Boolean trialExtendedInformed, Boolean trialFailure, Boolean trialFailureInformed, Boolean trialSuccess, Boolean trialSuccessInformed, Dialog dialog, AnimalShelter animalShelter, Volunteer volunteer, Set<Report> reports) {
+        super(id, fullName, phone, chatId);
+        this.stepParent = stepParent;
+        this.trialStart = trialStart;
+        this.trialPeriod = trialPeriod;
+        this.trialExtended = trialExtended;
+        this.trialExtendedInformed = trialExtendedInformed;
+        this.trialFailure = trialFailure;
+        this.trialFailureInformed = trialFailureInformed;
+        this.trialSuccess = trialSuccess;
+        this.trialSuccessInformed = trialSuccessInformed;
+        this.dialog = dialog;
+        this.animalShelter = animalShelter;
+        this.volunteer = volunteer;
+        this.reports = reports;
     }
 }

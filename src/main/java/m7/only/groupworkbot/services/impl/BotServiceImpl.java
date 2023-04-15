@@ -37,6 +37,11 @@ public class BotServiceImpl implements BotService {
     private static final String GREETINGS_TEXT = "Здравствуйте! Я бот приюта для животных. Выберите, пожалуйста, интересующее животное.";
 
     /**
+     * Текст сообщения, если не удалось распознать команду.
+     */
+    private static final String UNSUPPORTED_ENDPOINT = "Команда не распознана";
+
+    /**
      * Текст сообщения, если тип файла(фотографии) не поддерживается
      */
     private static final String UNSUPPORTED_IMAGE_FORMAT = "К сожалению, я не поддерживаю такой формат.";
@@ -209,6 +214,7 @@ public class BotServiceImpl implements BotService {
                 // если есть фото или документ
                 executeEndpointReportByPhoto(message);
             } else {
+                sendResponse(chatId, UNSUPPORTED_ENDPOINT, null);
                 logger.error("Запрос не распознан: {}", update);
             }
         }
@@ -250,7 +256,7 @@ public class BotServiceImpl implements BotService {
                     sendResponse(chatId, endpoint.getContent(), buttonList);
                 }, () -> {
                     logger.info("Команда не распознана: {}", endpointText);
-                    sendResponse(chatId, "Команда не распознана", null);
+                    sendResponse(chatId, UNSUPPORTED_ENDPOINT, null);
                 });
     }
 
@@ -310,7 +316,8 @@ public class BotServiceImpl implements BotService {
      * @param endpointText искомый эндпоинт
      * @return {@code false} если эндпоинт не найден, {@code true} - если произошел вызов метода для эндпоинта
      */
-    private boolean showSpecificMenu(Long chatId, String endpointText) {
+    @Override
+    public boolean showSpecificMenu(Long chatId, String endpointText) {
         String parsed = endpointText.split("_")[0];
         parsed = parsed.split("\s")[0];
         if (!ENDPOINTS.contains(parsed)) {
@@ -374,6 +381,7 @@ public class BotServiceImpl implements BotService {
             buttonList.add(getPrayButton());
             sendResponse(chatId, endpoint.getContent(), buttonList);
         } else {
+            sendResponse(chatId, UNSUPPORTED_ENDPOINT, null);
             logger.error("Эндпоинт не найден: {}", endpoint_text);
         }
     }

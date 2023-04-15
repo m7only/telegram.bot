@@ -81,7 +81,14 @@ public class AnimalShelter {
     @ToString.Exclude
     private Set<User> users;
 
-    public AnimalShelter(String about, AnimalType animalType, String contacts, String address, String openingHours, String securityRules, String safetyRules, String adoptionRules) {
+    public AnimalShelter(String about,
+                         AnimalType animalType,
+                         String contacts,
+                         String address,
+                         String openingHours,
+                         String securityRules,
+                         String safetyRules,
+                         String adoptionRules) {
         this.about = about;
         this.animalType = animalType;
         this.contacts = contacts;

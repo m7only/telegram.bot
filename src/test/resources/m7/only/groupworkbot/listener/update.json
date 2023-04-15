@@ -1,0 +1,8 @@
+{
+  "message": {
+    "text": "%text%",
+    "chat": {
+      "id": "%chatId%"
+    }
+  }
+}

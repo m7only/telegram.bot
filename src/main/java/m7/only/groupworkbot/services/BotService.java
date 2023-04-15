@@ -14,4 +14,6 @@ public interface BotService {
     void sendResponse(Long chatId, String content, List<InlineKeyboardButton> buttonList);
 
     InlineKeyboardMarkup buttonsByRows(List<InlineKeyboardButton> buttonList);
+
+    boolean showSpecificMenu(Long chatId, String endpointText);
 }
