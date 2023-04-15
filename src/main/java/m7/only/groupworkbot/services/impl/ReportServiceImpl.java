@@ -36,7 +36,7 @@ public class ReportServiceImpl implements ReportService {
      */
     @Override
     public Report saveReport(User user, String reportText, String fileId) {
-        Report report = findReportByUserOrCreateNew(user);
+        Report report = findReportByUserAndCurrentDateOrCreateNew(user);
 
         if (reportText != null && !reportText.isBlank()) {
             report.setReport(reportText);
@@ -52,13 +52,13 @@ public class ReportServiceImpl implements ReportService {
     }
 
     /**
-     * Поиск отчета, если отсутствует - вернет новый.
+     * Поиск отчета на текущую дату, если отсутствует - вернет новый.
      *
      * @param user пользователь
      * @return {@code Report} отчет
      */
     @Override
-    public Report findReportByUserOrCreateNew(User user) {
+    public Report findReportByUserAndCurrentDateOrCreateNew(User user) {
         List<Report> reports = reportRepository.findAllByUserId(user.getId());
         Optional<Report> optionalReport = reports.stream()
                 .filter(report -> report.getReportDate()

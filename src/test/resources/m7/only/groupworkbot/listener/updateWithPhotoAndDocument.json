@@ -1,0 +1,30 @@
+{
+  "message": {
+    "chat": {
+      "id": "%chatId%"
+    },
+    "document": {
+      "file_id": "%documentFileId%",
+      "file_unique_id": "123",
+      "mime_type": "%mimeType%"
+    },
+    "photo": [
+      {
+        "file_id": "%photo0_fileId%",
+        "file_unique_id": "456"
+      },
+      {
+        "file_id": "%photo1_fileId%",
+        "file_unique_id": "789"
+      },
+      {
+        "file_id": "%photo2_fileId%",
+        "file_unique_id": "987"
+      },
+      {
+        "file_id": "%photo3_fileId%",
+        "file_unique_id": "654"
+      }
+    ]
+  }
+}

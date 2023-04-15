@@ -6,5 +6,5 @@ import m7.only.groupworkbot.entity.user.User;
 public interface ReportService {
     Report saveReport(User user, String reportText, String fileId);
 
-    Report findReportByUserOrCreateNew(User user);
+    Report findReportByUserAndCurrentDateOrCreateNew(User user);
 }

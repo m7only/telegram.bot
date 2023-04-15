@@ -1,0 +1,11 @@
+{
+  "message": {
+    "chat": {
+      "id": "%chatId%"
+    },
+    "audio": {
+      "file_id": "%audioFileId%",
+      "file_unique_id": "123"
+    }
+  }
+}

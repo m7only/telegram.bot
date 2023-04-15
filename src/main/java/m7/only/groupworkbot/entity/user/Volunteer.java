@@ -4,7 +4,10 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import lombok.*;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
 import java.util.Set;
@@ -13,7 +16,6 @@ import java.util.Set;
  * Класс сущности волонтера
  */
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
 @EqualsAndHashCode(callSuper = true)
@@ -28,4 +30,9 @@ public class Volunteer extends Person {
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     private Set<User> users;
+
+    public Volunteer(Long id, String fullName, String phone, Long chatId, Set<User> users) {
+        super(id, fullName, phone, chatId);
+        this.users = users;
+    }
 }
