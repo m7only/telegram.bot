@@ -64,12 +64,14 @@ public class BotServiceImplTest {
     private static final String CORRECT_GET_CONTACTS_GREETINGS = "Сейчас вы можете оставить или изменить свои контактные данные. Введите свои ФИО.";
     private static final String CORRECT_GET_CONTACTS_PHONE = "Введите номер своего телефона.";
     private static final String CORRECT_GET_CONTACTS_SUCCESS = "Контактные данные сохранены.";
+    private static final String CORRECT_REPORT_INFO = "Для отправки отчета просто пришлите нам фотографию, в подписи которой опишите состояние животного: его рацион, самочувствие, как привыкает к новому месту, а так же приобретенные новые привычки. Фото и описание обязательны. Если вы отправили фотографию, но забыли описать состояние животного, ничего страшного: можете прислать еще одну фотографию или перед текстом сообщения поставьте команду \"/report \", например: \"/report Животное чувствует себя ...\"";
     // ----- FEEDBACK CONSTANT -----
     private static final String CORRECT_ENDPOINT_TEXT_START = "/start";
     private static final String CORRECT_ENDPOINT_TEXT_MAIN_MENU = "/mainMenu_CAT";
     private static final String CORRECT_ENDPOINT_TEXT_PRAY = "/pray";
     private static final String CORRECT_ENDPOINT_TEXT_GET_CONTACTS = "/getContacts";
     private static final String CORRECT_ENDPOINT_TEXT_REPORT = "/report report text";
+    private static final String CORRECT_ENDPOINT_TEXT_REPORT_INFO = "/reportInfo";
     private static final Report CORRECT_REPORT_FULL = new Report(
             1L,
             "report text",
@@ -451,5 +453,16 @@ public class BotServiceImplTest {
         capturedSendMessage = argumentCaptor.getAllValues().get(1);
         assertEquals(CORRECT_CHAT_ID, capturedSendMessage.getParameters().get("chat_id"));
         assertEquals(CORRECT_REPORT_REMIND_NEED_PHOTO, capturedSendMessage.getParameters().get("text"));
+    }
+
+    @Test
+    public void shouldCallExecuteEndpointReportByText() {
+        out.process(getUpdate(CORRECT_ENDPOINT_TEXT_REPORT_INFO));
+
+        ArgumentCaptor<SendMessage> argumentCaptor = ArgumentCaptor.forClass(SendMessage.class);
+        verify(telegramBotMock).execute(argumentCaptor.capture());
+        SendMessage capturedSendMessage = argumentCaptor.getValue();
+        assertEquals(CORRECT_CHAT_ID, capturedSendMessage.getParameters().get("chat_id"));
+        assertEquals(CORRECT_REPORT_INFO, capturedSendMessage.getParameters().get("text"));
     }
 }
