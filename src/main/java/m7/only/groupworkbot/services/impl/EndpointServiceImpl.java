@@ -18,13 +18,22 @@ public class EndpointServiceImpl implements EndpointService {
         this.endpointRepository = endpointRepository;
     }
 
+    /**
+     * Получение всех энпоинтов.
+     * @return лист эндпоинтов
+     */
     @Override
     public List<Endpoint> findAllEndpoints() {
         return endpointRepository.findAll();
     }
 
+    /**
+     * Поиск эндпоинта по его текстовому представлению, например "/pray"
+     * @param endpointText текстовое представление эндпоинта
+     * @return Endpoint эндпоинт, или null, если не найден
+     */
     @Override
-    public Endpoint findEndpointByEndpointText(String endpoint_text) {
-        return endpointRepository.findByEndpointText(endpoint_text).orElse(null);
+    public Endpoint findEndpointByEndpointText(String endpointText) {
+        return endpointRepository.findByEndpointText(endpointText).orElse(null);
     }
 }

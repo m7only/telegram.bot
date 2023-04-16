@@ -28,6 +28,11 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByChatId(chatId).orElseGet(() -> userRepository.save(new User(chatId)));
     }
 
+    /**
+     * Сохранение пользователя
+     * @param user пользователь, которого нужно сохранить
+     * @return User сохраненный пользователь
+     */
     @Override
     public User save(User user) {
         return userRepository.save(user);

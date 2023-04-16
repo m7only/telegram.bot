@@ -345,7 +345,8 @@ public class BotServiceImpl implements BotService {
      *
      * @return {@code InlineKeyboardButton} кнопка вызова волонтера
      */
-    private InlineKeyboardButton getPrayButton() {
+    @Override
+    public InlineKeyboardButton getPrayButton() {
         return new InlineKeyboardButton(ENDPOINT_PRAY_TITLE).callbackData(ENDPOINT_PRAY);
     }
 
@@ -354,7 +355,8 @@ public class BotServiceImpl implements BotService {
      *
      * @param chatId - идентификатор чата с пользователем
      */
-    private void executeEndpointStart(Long chatId) {
+    @Override
+    public void executeEndpointStart(Long chatId) {
         User user = userService.findUserByChatIdOrCreateNew(chatId);
         if (user == null) {
             userService.save(new User(chatId));
@@ -376,7 +378,8 @@ public class BotServiceImpl implements BotService {
      * @param chatId - идентификатор чата с пользователем
      * @throws NoSuchElementException если пользователь не найден
      */
-    private void executeEndpointMainMenu(Long chatId, String endpoint_text) {
+    @Override
+    public void executeEndpointMainMenu(Long chatId, String endpoint_text) {
         List<InlineKeyboardButton> buttonList = new ArrayList<>();
         Endpoint endpoint = endpointService.findEndpointByEndpointText(endpoint_text);
         if (endpoint != null) {
@@ -396,7 +399,8 @@ public class BotServiceImpl implements BotService {
      *
      * @param chatId - идентификатор чата с пользователем
      */
-    private void executeEndpointPray(Long chatId) {
+    @Override
+    public void executeEndpointPray(Long chatId) {
         sendResponse(
                 chatId,
                 "Зову волонтера...",
@@ -409,7 +413,8 @@ public class BotServiceImpl implements BotService {
      *
      * @param chatId - идентификатор чата с пользователем
      */
-    private void executeEndpointGetContacts(Long chatId, String endpointText) {
+    @Override
+    public void executeEndpointGetContacts(Long chatId, String endpointText) {
         User user = userService.findUserByChatIdOrCreateNew(chatId);
         Dialog dialog = user.getDialog();
 
@@ -444,7 +449,8 @@ public class BotServiceImpl implements BotService {
      *
      * @param chatId - идентификатор чата с пользователем
      */
-    private void executeEndpointReportInfo(Long chatId) {
+    @Override
+    public void executeEndpointReportInfo(Long chatId) {
         sendResponse(chatId, REPORT_INFO, null);
     }
 
@@ -453,7 +459,8 @@ public class BotServiceImpl implements BotService {
      *
      * @param message - идентификатор чата с пользователем
      */
-    private void executeEndpointReportByPhoto(Message message) {
+    @Override
+    public void executeEndpointReportByPhoto(Message message) {
         Long chatId = message.chat().id();
         Document document = message.document();
         String fileId = null;
@@ -500,7 +507,8 @@ public class BotServiceImpl implements BotService {
      *
      * @param chatId - идентификатор чата с пользователем
      */
-    private void executeEndpointReportByText(Long chatId, String endpointText) {
+    @Override
+    public void executeEndpointReportByText(Long chatId, String endpointText) {
         Report report = reportService.saveReport(
                 userService.findUserByChatIdOrCreateNew(chatId),
                 endpointText.replaceAll(ENDPOINT_REPORT, ""),
@@ -524,7 +532,8 @@ public class BotServiceImpl implements BotService {
      *
      * @param chatId - идентификатор чата с пользователем
      */
-    private void executeEndpointViolation(Long chatId) {
+    @Override
+    public void executeEndpointViolation(Long chatId) {
     }
 
 }

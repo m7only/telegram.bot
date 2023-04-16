@@ -77,6 +77,9 @@ public class User extends Person {
     @Column(name = "trial_success_informed")
     private Boolean trialSuccessInformed = false;
 
+    /**
+     * Последняя выполненная операция в меню с диалогом
+     */
     @Column(name = "dialog")
     @Enumerated(EnumType.STRING)
     private Dialog dialog;
