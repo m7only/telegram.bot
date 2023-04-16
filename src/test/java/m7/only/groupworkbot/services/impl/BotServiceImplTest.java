@@ -67,7 +67,9 @@ public class BotServiceImplTest {
     private static final String CORRECT_REPORT_INFO = "Для отправки отчета просто пришлите нам фотографию, в подписи которой опишите состояние животного: его рацион, самочувствие, как привыкает к новому месту, а так же приобретенные новые привычки. Фото и описание обязательны. Если вы отправили фотографию, но забыли описать состояние животного, ничего страшного: можете прислать еще одну фотографию или перед текстом сообщения поставьте команду \"/report \", например: \"/report Животное чувствует себя ...\"";
     // ----- FEEDBACK CONSTANT -----
     private static final String CORRECT_ENDPOINT_TEXT_START = "/start";
+    private static final String INCORRECT_ENDPOINT_FRONT_END_TEXT = "null";
     private static final String CORRECT_ENDPOINT_TEXT_MAIN_MENU = "/mainMenu_CAT";
+    private static final String INCORRECT_ENDPOINT_TEXT_MAIN_MENU = "/mainMenu_ASDFASDD";
     private static final String CORRECT_ENDPOINT_TEXT_PRAY = "/pray";
     private static final String CORRECT_ENDPOINT_TEXT_GET_CONTACTS = "/getContacts";
     private static final String CORRECT_ENDPOINT_TEXT_REPORT = "/report report text";
@@ -181,6 +183,19 @@ public class BotServiceImplTest {
     }
 
     @Test
+    public void shouldCallShowFrontEndAndMenuAndSendUnsupportedEndpoint() {
+        when(userServiceMock.findUserByChatIdOrCreateNew(any())).thenReturn(CORRECT_USER);
+
+        out.process(getUpdate(INCORRECT_ENDPOINT_FRONT_END_TEXT));
+
+        ArgumentCaptor<SendMessage> argumentCaptor = ArgumentCaptor.forClass(SendMessage.class);
+        verify(telegramBotMock).execute(argumentCaptor.capture());
+        SendMessage capturedSendMessage = argumentCaptor.getValue();
+        assertEquals(CORRECT_CHAT_ID, capturedSendMessage.getParameters().get("chat_id"));
+        assertEquals(UNSUPPORTED_ENDPOINT, capturedSendMessage.getParameters().get("text"));
+    }
+
+    @Test
     public void shouldCallExecuteEndpointStart() {
         when(userServiceMock.findUserByChatIdOrCreateNew(any())).thenReturn(null);
         when(userServiceMock.save(any())).thenReturn(CORRECT_USER);
@@ -217,6 +232,18 @@ public class BotServiceImplTest {
         CORRECT_FRONT_ENDPOINT.setChild(new HashSet<>());
     }
 
+    @Test
+    public void shouldCallExecuteEndpointMainMenuAndSendUnsupportedEndpoint() {
+        when(endpointServiceMock.findEndpointByEndpointText(any())).thenReturn(null);
+
+        out.process(getUpdate(INCORRECT_ENDPOINT_TEXT_MAIN_MENU));
+
+        ArgumentCaptor<SendMessage> argumentCaptor = ArgumentCaptor.forClass(SendMessage.class);
+        verify(telegramBotMock).execute(argumentCaptor.capture());
+        SendMessage capturedSendMessage = argumentCaptor.getValue();
+        assertEquals(CORRECT_CHAT_ID, capturedSendMessage.getParameters().get("chat_id"));
+        assertEquals(UNSUPPORTED_ENDPOINT, capturedSendMessage.getParameters().get("text"));
+    }
     @Test
     public void shouldCallSendResponseForFrontMenuWithOneButton() {
         CORRECT_FRONT_ENDPOINT.getChild().add(new Endpoint());
