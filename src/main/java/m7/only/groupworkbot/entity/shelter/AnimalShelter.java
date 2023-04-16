@@ -75,7 +75,9 @@ public class AnimalShelter {
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     private Set<Endpoint> endpoints;
-
+    /**
+     * Пользователи, приписанные к приюту
+     */
     @OneToMany(mappedBy = "animalShelter", cascade = CascadeType.ALL)
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
