@@ -50,6 +50,13 @@ public class BotServiceImplTest {
     private static final String CORRECT_MIME_TYPE = "image/jpeg";
     private static final Long CORRECT_CHAT_ID = 17L;
     private static final User CORRECT_USER = new User(CORRECT_CHAT_ID);
+    private static final Report CORRECT_REPORT_FULL = new Report(
+            1L,
+            "report text",
+            CORRECT_LOCAL_DATE_TIME,
+            CORRECT_USER,
+            Set.of(new ReportPhoto())
+    );
     private static final String CORRECT_FRONT_MENU_ENDPOINT_WITH_PARENT = "/security_DOG";
     private static final String JSON;
     // ----- FEEDBACK CONSTANT -----
@@ -72,13 +79,6 @@ public class BotServiceImplTest {
     private static final String CORRECT_ENDPOINT_TEXT_GET_CONTACTS = "/getContacts";
     private static final String CORRECT_ENDPOINT_TEXT_REPORT = "/report report text";
     private static final String CORRECT_ENDPOINT_TEXT_REPORT_INFO = "/reportInfo";
-    private static final Report CORRECT_REPORT_FULL = new Report(
-            1L,
-            "report text",
-            CORRECT_LOCAL_DATE_TIME,
-            CORRECT_USER,
-            Set.of(new ReportPhoto())
-    );
     private static final AnimalShelter CORRECT_ANIMAL_SHELTER = new AnimalShelter(
             "about",
             AnimalType.CAT,

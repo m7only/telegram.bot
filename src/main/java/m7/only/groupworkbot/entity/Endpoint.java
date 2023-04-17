@@ -1,6 +1,8 @@
 package m7.only.groupworkbot.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import m7.only.groupworkbot.entity.shelter.AnimalShelter;
 
@@ -22,24 +24,28 @@ public class Endpoint {
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @NotNull
     private Long id;
 
     /**
      * Текстовое представление эндпоинта {@code "/start", "/mainMenu", "/pray" и т.д.}
      */
     @Column(name = "endpoint_text")
+    @NotEmpty
     private String endpointText;
 
     /**
      * Заголовок ссылки/кнопки
      */
     @Column(name = "title")
+    @NotEmpty
     private String title;
 
     /**
      * Текстовое сообщение в эндпоинте
      */
     @Column(name = "content")
+    @NotEmpty
     private String content;
 
     /**
@@ -49,6 +55,7 @@ public class Endpoint {
     @JoinColumn(name = "animal_shelter_id", referencedColumnName = "id")
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
+    @NotEmpty
     private AnimalShelter animalShelter;
 
     /**
@@ -78,5 +85,4 @@ public class Endpoint {
         this.animalShelter = animalShelter;
         this.parent = parent;
     }
-
 }
