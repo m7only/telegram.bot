@@ -1,6 +1,8 @@
 package m7.only.groupworkbot.entity.report;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import m7.only.groupworkbot.entity.user.User;
 
@@ -25,12 +27,14 @@ public class Report {
      * Текст отчета
      */
     @Column(name = "report")
+    @NotEmpty
     private String report;
 
     /**
      * Дата создания отчета
      */
     @Column(name = "report_date")
+    @NotNull
     private LocalDateTime reportDate;
 
     /**
@@ -40,6 +44,7 @@ public class Report {
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
+    @NotNull
     private User user;
     /**
      * Фотографии животного

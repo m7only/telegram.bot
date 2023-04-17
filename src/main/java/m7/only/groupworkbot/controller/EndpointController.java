@@ -31,7 +31,7 @@ public class EndpointController {
         this.endpointService = endpointService;
     }
 
-    @Operation(summary = "Добавление рецепта")
+    @Operation(summary = "Добавление эндпоинта")
     @PostMapping
     public ResponseEntity<Endpoint> addEndpoint(@RequestBody @Validated Endpoint endpoint) {
         Optional<Endpoint> optionalEndpoint = endpointService.add(endpoint);

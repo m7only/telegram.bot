@@ -153,7 +153,7 @@ public class BotServiceImplTest {
         Update update = BotUtils.fromJson(json, Update.class);
 
         when(userServiceMock.findUserByChatIdOrCreateNew(any())).thenReturn(null);
-        when(userServiceMock.save(any())).thenReturn(CORRECT_USER);
+        when(userServiceMock.add(any())).thenReturn(CORRECT_USER);
         when(animalShelterServiceMock.findAllShelters()).thenReturn(List.of(CORRECT_ANIMAL_SHELTER));
 
         out.process(update);
@@ -198,7 +198,7 @@ public class BotServiceImplTest {
     @Test
     public void shouldCallExecuteEndpointStart() {
         when(userServiceMock.findUserByChatIdOrCreateNew(any())).thenReturn(null);
-        when(userServiceMock.save(any())).thenReturn(CORRECT_USER);
+        when(userServiceMock.add(any())).thenReturn(CORRECT_USER);
         when(animalShelterServiceMock.findAllShelters()).thenReturn(List.of(CORRECT_ANIMAL_SHELTER));
 
         out.process(getUpdate(CORRECT_ENDPOINT_TEXT_START));
@@ -244,6 +244,7 @@ public class BotServiceImplTest {
         assertEquals(CORRECT_CHAT_ID, capturedSendMessage.getParameters().get("chat_id"));
         assertEquals(UNSUPPORTED_ENDPOINT, capturedSendMessage.getParameters().get("text"));
     }
+
     @Test
     public void shouldCallSendResponseForFrontMenuWithOneButton() {
         CORRECT_FRONT_ENDPOINT.getChild().add(new Endpoint());
@@ -302,7 +303,7 @@ public class BotServiceImplTest {
     @Test
     public void shouldCallExecuteEndpointGetContacts() {
         when(userServiceMock.findUserByChatIdOrCreateNew(any())).thenReturn(CORRECT_USER);
-        when(userServiceMock.save(any())).thenReturn(CORRECT_USER);
+        when(userServiceMock.add(any())).thenReturn(CORRECT_USER);
 
         out.process(getUpdate(CORRECT_ENDPOINT_TEXT_GET_CONTACTS));
 
@@ -318,7 +319,7 @@ public class BotServiceImplTest {
         CORRECT_USER.setDialog(Dialog.GET_CONTACTS_FULL_NAME);
 
         when(userServiceMock.findUserByChatIdOrCreateNew(any())).thenReturn(CORRECT_USER);
-        when(userServiceMock.save(any())).thenReturn(CORRECT_USER);
+        when(userServiceMock.add(any())).thenReturn(CORRECT_USER);
 
         out.process(getUpdate(CORRECT_ENDPOINT_TEXT_GET_CONTACTS));
 
@@ -336,7 +337,7 @@ public class BotServiceImplTest {
         CORRECT_USER.setDialog(Dialog.GET_CONTACTS_PHONE);
 
         when(userServiceMock.findUserByChatIdOrCreateNew(any())).thenReturn(CORRECT_USER);
-        when(userServiceMock.save(any())).thenReturn(CORRECT_USER);
+        when(userServiceMock.add(any())).thenReturn(CORRECT_USER);
 
         out.process(getUpdate(CORRECT_ENDPOINT_TEXT_GET_CONTACTS));
 

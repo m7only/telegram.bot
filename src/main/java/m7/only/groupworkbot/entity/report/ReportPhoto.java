@@ -1,6 +1,8 @@
 package m7.only.groupworkbot.entity.report;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 /**
@@ -21,6 +23,7 @@ public class ReportPhoto {
      * Имя файла в хранилище
      */
     @Column(name = "file_id")
+    @NotEmpty
     private String fileId;
 
     /**
@@ -30,6 +33,7 @@ public class ReportPhoto {
     @JoinColumn(name = "report_id", referencedColumnName = "id")
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
+    @NotNull
     private Report report;
 
     public ReportPhoto(String fileId, Report report) {
