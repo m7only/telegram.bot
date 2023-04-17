@@ -22,7 +22,7 @@ public interface BotService {
 
     void executeEndpointStart(Long chatId);
 
-    void executeEndpointMainMenu(Long chatId, String endpoint_text);
+    void executeEndpointMainMenu(Long chatId, String endpointText);
 
     void executeEndpointPray(Long chatId);
 

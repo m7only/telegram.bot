@@ -55,7 +55,7 @@ public class Endpoint {
     @JoinColumn(name = "animal_shelter_id", referencedColumnName = "id")
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
-    @NotEmpty
+    @NotNull
     private AnimalShelter animalShelter;
 
     /**

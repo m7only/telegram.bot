@@ -8,7 +8,7 @@ import java.util.Optional;
 public interface EndpointService {
     List<Endpoint> findAllEndpoints();
 
-    Endpoint findEndpointByEndpointText(String endpoint_text);
+    Endpoint findEndpointByEndpointText(String endpointText);
 
     Optional<Endpoint> add(Endpoint endpoint);
 

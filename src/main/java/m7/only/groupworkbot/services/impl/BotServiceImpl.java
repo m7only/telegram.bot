@@ -359,7 +359,7 @@ public class BotServiceImpl implements BotService {
     public void executeEndpointStart(Long chatId) {
         User user = userService.findUserByChatIdOrCreateNew(chatId);
         if (user == null) {
-            userService.save(new User(chatId));
+            userService.add(new User(chatId));
         }
         List<InlineKeyboardButton> buttonList = new ArrayList<>();
         animalShelterService.findAllShelters().forEach(animalShelter ->
@@ -379,9 +379,9 @@ public class BotServiceImpl implements BotService {
      * @throws NoSuchElementException если пользователь не найден
      */
     @Override
-    public void executeEndpointMainMenu(Long chatId, String endpoint_text) {
+    public void executeEndpointMainMenu(Long chatId, String endpointText) {
         List<InlineKeyboardButton> buttonList = new ArrayList<>();
-        Endpoint endpoint = endpointService.findEndpointByEndpointText(endpoint_text);
+        Endpoint endpoint = endpointService.findEndpointByEndpointText(endpointText);
         if (endpoint != null) {
             endpoint.getChild().forEach(childEndpoint -> buttonList
                     .add(new InlineKeyboardButton(childEndpoint.getTitle())
@@ -390,7 +390,7 @@ public class BotServiceImpl implements BotService {
             sendResponse(chatId, endpoint.getContent(), buttonList);
         } else {
             sendResponse(chatId, UNSUPPORTED_ENDPOINT, null);
-            logger.error("Эндпоинт не найден: {}", endpoint_text);
+            logger.error("Эндпоинт не найден: {}", endpointText);
         }
     }
 
@@ -422,21 +422,21 @@ public class BotServiceImpl implements BotService {
         if (dialog != Dialog.GET_CONTACTS_PHONE && dialog != Dialog.GET_CONTACTS_FULL_NAME) {
             sendResponse(chatId, GET_CONTACTS_GREETINGS, null);
             user.setDialog(Dialog.GET_CONTACTS_FULL_NAME);
-            userService.save(user);
+            userService.add(user);
         } else {
             switch (dialog) {
                 // если пользователь уже ввел ФИО, сохраняем фио и запрашиваем номер телефона
                 case GET_CONTACTS_FULL_NAME -> {
                     user.setFullName(endpointText);
                     user.setDialog(Dialog.GET_CONTACTS_PHONE);
-                    userService.save(user);
+                    userService.add(user);
                     sendResponse(chatId, GET_CONTACTS_PHONE, null);
                 }
                 // если пользователь ввел номер телефона, сохраняем номер телефона и показываем главное меню с выбором приюта
                 case GET_CONTACTS_PHONE -> {
                     user.setDialog(null);
                     user.setPhone(endpointText); // надо бы наверно парсить по формату
-                    userService.save(user);
+                    userService.add(user);
                     sendResponse(chatId, GET_CONTACTS_SUCCESS, null);
                     executeEndpointStart(chatId);
                 }

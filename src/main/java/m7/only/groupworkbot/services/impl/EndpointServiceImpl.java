@@ -68,7 +68,7 @@ public class EndpointServiceImpl implements EndpointService {
      * Получение эндпоинта по id для API.
      *
      * @param id идентификатор эндпоинта
-     * @return {@code Optional<Endpoint>} если сохранен, или {@code Optional.empty()}, если не найден
+     * @return {@code Optional<Endpoint>} если найден, или {@code Optional.empty()}, если не найден
      */
     @Override
     public Optional<Endpoint> getById(Long id) {
