@@ -30,6 +30,7 @@ public class UserServiceImpl implements UserService {
 
     /**
      * Сохранение пользователя
+     *
      * @param user пользователь, которого нужно сохранить
      * @return User сохраненный пользователь
      */
