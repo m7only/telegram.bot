@@ -3,12 +3,14 @@ package m7.only.groupworkbot.services.impl;
 import m7.only.groupworkbot.entity.report.Report;
 import m7.only.groupworkbot.entity.user.User;
 import m7.only.groupworkbot.repository.UserRepository;
+import m7.only.groupworkbot.services.BotService;
 import m7.only.groupworkbot.services.ScheduledService;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -32,10 +34,10 @@ public class ScheduledServiceImpl implements ScheduledService {
     // ----- FEEDBACK CONSTANT -----
 
     private final UserRepository userRepository;
-    private final BotServiceImpl botService;
+    private final BotService botService;
     private List<User> users = new ArrayList<>();
 
-    public ScheduledServiceImpl(UserRepository userRepository, BotServiceImpl botService) {
+    public ScheduledServiceImpl(UserRepository userRepository, BotService botService) {
         this.userRepository = userRepository;
         this.botService = botService;
     }
@@ -53,6 +55,7 @@ public class ScheduledServiceImpl implements ScheduledService {
         sendFailure(users);
         requestTrialSuccess(users);
         reportReminder();
+        reportReminderVolunteer();
     }
 
     /**
@@ -74,14 +77,12 @@ public class ScheduledServiceImpl implements ScheduledService {
      */
     @Override
     public void reportReminderVolunteer() {
-        LocalDate today = LocalDate.now();
         List<Report> reports = users
                 .stream()
                 .flatMap(e -> e.getReports()
                         .stream()
                         .filter(report ->
-                                (report.getReportDate().toLocalDate().equals(today)
-                                        && report.getReportDate().toLocalDate().equals(today.minusDays(1)))))
+                                (report.getReportDate().isBefore(LocalDateTime.now().minusDays(2)))))
                 .toList();
 
         reports.forEach(report -> {
@@ -165,7 +166,7 @@ public class ScheduledServiceImpl implements ScheduledService {
         users.stream()
                 .filter(User::getTrialSuccess)
                 .peek(e -> {
-                    if (!e.getTrialSuccess()) {
+                    if (e.getTrialSuccess()) {
                         botService.sendResponse(e.getVolunteer().getChatId(), TRIAL_SUCCESS_MESSAGE + e, null);
                     }
                 })
