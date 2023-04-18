@@ -166,7 +166,7 @@ public class ScheduledServiceImpl implements ScheduledService {
         users.stream()
                 .filter(User::getTrialSuccess)
                 .peek(e -> {
-                    if (!e.getTrialSuccess()) {
+                    if (e.getTrialSuccess()) {
                         botService.sendResponse(e.getVolunteer().getChatId(), TRIAL_SUCCESS_MESSAGE + e, null);
                     }
                 })

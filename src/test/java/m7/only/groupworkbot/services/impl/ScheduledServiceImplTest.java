@@ -72,16 +72,6 @@ public class ScheduledServiceImplTest {
     }
 
     /**
-     * Пользователь с закончившимся и подтвержденным испытательным сроком
-     */
-    private static final User USER_WITH_TRIAL_SUCCESS = new User();
-
-    /**
-     * Пользователь с увеличенным испытательным сроком
-     */
-    private static final User USER_WITH_TRIAL_EXTENDED = new User();
-
-    /**
      * Пользователь для подстановки проверки
      */
     private static final User USER_FOR_TEST_1 = new User(
@@ -147,6 +137,6 @@ public class ScheduledServiceImplTest {
 
         assertTrue(USERS_LIST.contains(USER_RESULT));
 
-        verify(botServiceMock, times(5)).sendResponse(any(), any(), any());
+        verify(botServiceMock, times(6)).sendResponse(any(), any(), any());
     }
 }
