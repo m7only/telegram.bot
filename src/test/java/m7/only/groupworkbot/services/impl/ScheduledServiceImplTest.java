@@ -6,11 +6,13 @@ import m7.only.groupworkbot.entity.shelter.AnimalType;
 import m7.only.groupworkbot.entity.user.User;
 import m7.only.groupworkbot.entity.user.Volunteer;
 import m7.only.groupworkbot.repository.UserRepository;
+import m7.only.groupworkbot.services.BotService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -80,24 +82,59 @@ public class ScheduledServiceImplTest {
     private static final User USER_WITH_TRIAL_EXTENDED = new User();
 
     /**
-     * Пользователь с проваленным испытательным сроком
+     * Пользователь для подстановки проверки
      */
-    private static final User USER_WITH_TRIAL_FAILURE = new User();
+    private static final User USER_FOR_TEST_1 = new User(
+            25L,
+            "Full Name",
+            "+7123456",
+            CORRECT_CHAT_ID,
+            true,
+            CORRECT_LOCAL_DATE,
+            30,
+            true,
+            false,
+            true,
+            false,
+            true,
+            false,
+            null,
+            CORRECT_ANIMAL_SHELTER,
+            CORRECT_VOLUNTEER,
+            Set.of(CORRECT_EXPIRED_REPORT)
+    );
 
     /**
-     * Пользователь с закончившимся испытательным сроком
+     * Пользователь для проверки результата
      */
-    private static final User USER_WITH_TRIAL_END = new User();
+    private static final User USER_RESULT = new User(
+            25L,
+            "Full Name",
+            "+7123456",
+            CORRECT_CHAT_ID,
+            true,
+            CORRECT_LOCAL_DATE,
+            30,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            null,
+            CORRECT_ANIMAL_SHELTER,
+            CORRECT_VOLUNTEER,
+            Set.of(CORRECT_EXPIRED_REPORT));
 
     private static final List<User> USERS_LIST = List.of(
-            USER_WITH_EXPIRED_REPORTS
+            USER_FOR_TEST_1
     );
 
     @Mock
     private UserRepository userRepositoryMock;
 
     @Mock
-    private BotServiceImpl botServiceMock;
+    private BotService botServiceMock;
 
     @InjectMocks
     private ScheduledServiceImpl out;
@@ -105,7 +142,11 @@ public class ScheduledServiceImplTest {
     @Test
     void shouldSendRemindAndReminderVolunteer() {
         when(userRepositoryMock.findUserByStepParentIsTrue()).thenReturn(USERS_LIST);
+
         out.dailyTask();
-        verify(botServiceMock, times(2)).sendResponse(any(), any(), any());
+
+        assertTrue(USERS_LIST.contains(USER_RESULT));
+
+        verify(botServiceMock, times(5)).sendResponse(any(), any(), any());
     }
 }

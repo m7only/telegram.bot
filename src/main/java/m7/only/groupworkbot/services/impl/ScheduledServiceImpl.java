@@ -77,14 +77,12 @@ public class ScheduledServiceImpl implements ScheduledService {
      */
     @Override
     public void reportReminderVolunteer() {
-        LocalDate today = LocalDate.now();
         List<Report> reports = users
                 .stream()
                 .flatMap(e -> e.getReports()
                         .stream()
-                        .filter(report -> report.getReportDate().isBefore(LocalDateTime.now().minusDays(2)) /*&&
-                                (report.getReportDate().toLocalDate().equals(today)
-                                        && report.getReportDate().toLocalDate().equals(today.minusDays(1)))*/))
+                        .filter(report ->
+                                (report.getReportDate().isBefore(LocalDateTime.now().minusDays(2)))))
                 .toList();
 
         reports.forEach(report -> {
