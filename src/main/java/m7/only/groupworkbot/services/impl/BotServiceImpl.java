@@ -14,7 +14,6 @@ import m7.only.groupworkbot.entity.report.Report;
 import m7.only.groupworkbot.entity.user.Dialog;
 import m7.only.groupworkbot.entity.user.User;
 import m7.only.groupworkbot.entity.user.Volunteer;
-import m7.only.groupworkbot.repository.VolunteerRepository;
 import m7.only.groupworkbot.services.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -165,9 +164,9 @@ public class BotServiceImpl implements BotService {
     private final UserService userService;
     private final AnimalShelterService animalShelterService;
     private final ReportService reportService;
-    private final VolunteerServiceImpl volunteerService;
+    private final VolunteerService volunteerService;
 
-    public BotServiceImpl(TelegramBot telegramBot, EndpointService endpointService, UserService userService, AnimalShelterService animalShelterService, ReportService reportService, VolunteerServiceImpl volunteerService, VolunteerRepository volunteerRepository) {
+    public BotServiceImpl(TelegramBot telegramBot, EndpointService endpointService, UserService userService, AnimalShelterService animalShelterService, ReportService reportService, VolunteerServiceImpl volunteerService) {
         this.telegramBot = telegramBot;
         this.endpointService = endpointService;
         this.userService = userService;
