@@ -13,6 +13,7 @@ import m7.only.groupworkbot.entity.Endpoint;
 import m7.only.groupworkbot.entity.report.Report;
 import m7.only.groupworkbot.entity.user.Dialog;
 import m7.only.groupworkbot.entity.user.User;
+import m7.only.groupworkbot.entity.user.Volunteer;
 import m7.only.groupworkbot.services.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -134,6 +135,7 @@ public class BotServiceImpl implements BotService {
      */
     private static final String ENDPOINT_VIOLATION = "/violation";
 
+
     /**
      * Список наших энпоинтов, чтоб не приступать к перебору если искомого в нем нет
      */
@@ -162,13 +164,15 @@ public class BotServiceImpl implements BotService {
     private final UserService userService;
     private final AnimalShelterService animalShelterService;
     private final ReportService reportService;
+    private final VolunteerService volunteerService;
 
-    public BotServiceImpl(TelegramBot telegramBot, EndpointService endpointService, UserService userService, AnimalShelterService animalShelterService, ReportService reportService) {
+    public BotServiceImpl(TelegramBot telegramBot, EndpointService endpointService, UserService userService, AnimalShelterService animalShelterService, ReportService reportService, VolunteerServiceImpl volunteerService) {
         this.telegramBot = telegramBot;
         this.endpointService = endpointService;
         this.userService = userService;
         this.animalShelterService = animalShelterService;
         this.reportService = reportService;
+        this.volunteerService = volunteerService;
     }
 
     /**
@@ -401,11 +405,23 @@ public class BotServiceImpl implements BotService {
      */
     @Override
     public void executeEndpointPray(Long chatId) {
-        sendResponse(
-                chatId,
-                "Зову волонтера...",
-                List.of(new InlineKeyboardButton(ENDPOINT_START)
-                        .callbackData(ENDPOINT_START)));
+        User user = userService.findUserByChatIdOrCreateNew(chatId);
+        if (user.getPhone() == null) {
+            executeEndpointGetContacts(chatId, null);
+            sendResponse(
+                    chatId,
+                    "Необходимо оставить контактные данные для того, что бы волонтер смог с вами связаться",
+                    List.of(new InlineKeyboardButton(ENDPOINT_START)
+                            .callbackData(ENDPOINT_START)));
+
+        } else {
+            executeEndpointViolation(chatId);
+            sendResponse(
+                    chatId,
+                    "Зову волонтера...",
+                    List.of(new InlineKeyboardButton(ENDPOINT_START)
+                            .callbackData(ENDPOINT_START)));
+        }
     }
 
     /**
@@ -534,6 +550,18 @@ public class BotServiceImpl implements BotService {
      */
     @Override
     public void executeEndpointViolation(Long chatId) {
+        User user = userService.findUserByChatIdOrCreateNew(chatId);
+        if (user.getVolunteer() != null) {
+            sendResponse(user.getVolunteer().getChatId(),
+                    "Пользователь просит помощи " + user.getFullName() + user.getPhone() + " id - " + user.getChatId(),
+                    null);
+        } else {
+            List<Volunteer> volunteerList = volunteerService.getAll();
+            int random = new Random().nextInt(volunteerList.size());
+            Volunteer volunteer = volunteerList.get(random);
+            sendResponse(volunteer.getChatId(),
+                    "Пользователь просит помощи " + user.getFullName() + user.getPhone() + " id - " + user.getChatId(),
+                    null);
+        }
     }
-
 }
