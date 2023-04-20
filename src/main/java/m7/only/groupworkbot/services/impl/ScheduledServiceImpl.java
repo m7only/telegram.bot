@@ -9,7 +9,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +30,10 @@ public class ScheduledServiceImpl implements ScheduledService {
     private static final String SEND_EXTEND_TRIAL_MESSAGE = "Вам назначен дополнительный период";
     private static final String SEND_FAILURE_MESSAGE = "Испытательный срок провален";
     private static final String TRIAL_SUCCESS_MESSAGE = "Закончился испытательный срок";
+
+    private static final String CORRECT_REPORT_MESSAGE = "Дорогой усыновитель, мы заметили, что ты заполняешь отчет " +
+            "не так подробно, как необходимо. Пожалуйста, подойди ответственнее к этому занятию. " +
+            "В противном случае волонтеры приюта будут обязаны самолично проверять условия содержания животного";
     // ----- FEEDBACK CONSTANT -----
 
     private final UserRepository userRepository;
@@ -56,6 +59,7 @@ public class ScheduledServiceImpl implements ScheduledService {
         requestTrialSuccess(users);
         reportReminder();
         reportReminderVolunteer();
+        sendCorrectReport(users);
     }
 
     /**
@@ -90,6 +94,21 @@ public class ScheduledServiceImpl implements ScheduledService {
         });
     }
 
+    /**
+     * При ежедневном проходе по всем усыновителям проверяем
+     * установлен ли флаг {@code User.correct_report} об корректном заполнении отчета.
+     * Если флаг стоит, то информируем усыновителя.
+     * Отправляем стандартное сообщение с дальнейшими действиями
+     * @param users лист со всеми пользователями
+     */
+    private void sendCorrectReport(List<User> users) {
+        users.stream()
+                .filter(User::getCorrectReport)
+                .peek(e -> {
+                    botService.sendResponse(e.getChatId(), CORRECT_REPORT_MESSAGE, null);
+                })
+                .collect(Collectors.toList());
+    }
 
     /**
      * При ежедневном проходе по всем усыновителям проверяем закончился ли
@@ -109,7 +128,6 @@ public class ScheduledServiceImpl implements ScheduledService {
                     }
                 })
                 .collect(Collectors.toList());
-
 
     }
 
@@ -166,9 +184,7 @@ public class ScheduledServiceImpl implements ScheduledService {
         users.stream()
                 .filter(User::getTrialSuccess)
                 .peek(e -> {
-                    if (e.getTrialSuccess()) {
-                        botService.sendResponse(e.getVolunteer().getChatId(), TRIAL_SUCCESS_MESSAGE + e, null);
-                    }
+                    botService.sendResponse(e.getVolunteer().getChatId(), TRIAL_SUCCESS_MESSAGE + e, null);
                 })
                 .collect(Collectors.toList());
     }
