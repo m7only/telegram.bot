@@ -94,3 +94,6 @@ ALTER TABLE reports ADD COLUMN report_date TIMESTAMP(6);
 
 --changeSet skryagin:4
 ALTER TABLE bot_users ADD COLUMN dialog VARCHAR(255);
+
+--changeSet selin:1
+ALTER TABLE bot_users ADD COLUMN correct_report BOOLEAN;

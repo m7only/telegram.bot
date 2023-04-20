@@ -78,6 +78,12 @@ public class User extends Person {
     private Boolean trialSuccessInformed = false;
 
     /**
+     * Флаг, о корректности заполнении отчета, {@code false} - некорректный
+     */
+    @Column(name = "correct_report")
+    private Boolean correctReport = true;
+
+    /**
      * Последняя выполненная операция в меню с диалогом
      */
     @Column(name = "dialog")
@@ -105,7 +111,7 @@ public class User extends Person {
     /**
      * Список отчетов пользователя
      */
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL,fetch = FetchType.EAGER)
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     private Set<Report> reports;
