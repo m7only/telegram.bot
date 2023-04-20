@@ -99,6 +99,7 @@ public class ScheduledServiceImpl implements ScheduledService {
      * установлен ли флаг {@code User.correct_report} об корректном заполнении отчета.
      * Если флаг стоит, то информируем усыновителя.
      * Отправляем стандартное сообщение с дальнейшими действиями
+     *
      * @param users лист со всеми пользователями
      */
     private void sendCorrectReport(List<User> users) {

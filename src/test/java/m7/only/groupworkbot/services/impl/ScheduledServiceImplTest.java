@@ -12,12 +12,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -38,11 +38,11 @@ public class ScheduledServiceImplTest {
     private static final Volunteer CORRECT_VOLUNTEER = new Volunteer();
 
     private static final Report CORRECT_EXPIRED_REPORT;
-
     static {
         CORRECT_EXPIRED_REPORT = new Report();
         CORRECT_EXPIRED_REPORT.setReportDate(CORRECT_LOCAL_DATE.atStartOfDay().minusDays(3));
     }
+
 
     /**
      * Пользователь с отчетами более двух дней назад
@@ -93,7 +93,9 @@ public class ScheduledServiceImplTest {
             CORRECT_VOLUNTEER,
             Set.of(CORRECT_EXPIRED_REPORT)
     );
-
+    private static final List<User> USERS_LIST = List.of(
+            USER_FOR_TEST_1
+    );
     /**
      * Пользователь для проверки результата
      */
@@ -115,10 +117,6 @@ public class ScheduledServiceImplTest {
             CORRECT_ANIMAL_SHELTER,
             CORRECT_VOLUNTEER,
             Set.of(CORRECT_EXPIRED_REPORT));
-
-    private static final List<User> USERS_LIST = List.of(
-            USER_FOR_TEST_1
-    );
 
     @Mock
     private UserRepository userRepositoryMock;
