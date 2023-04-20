@@ -137,6 +137,6 @@ public class ScheduledServiceImplTest {
 
         assertTrue(USERS_LIST.contains(USER_RESULT));
 
-        verify(botServiceMock, times(6)).sendResponse(any(), any(), any());
+        verify(botServiceMock, times(7)).sendResponse(any(), any(), any());
     }
 }
