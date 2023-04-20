@@ -13,11 +13,9 @@ import m7.only.groupworkbot.entity.shelter.AnimalShelter;
 import m7.only.groupworkbot.entity.shelter.AnimalType;
 import m7.only.groupworkbot.entity.user.Dialog;
 import m7.only.groupworkbot.entity.user.User;
+import m7.only.groupworkbot.entity.user.Volunteer;
 import m7.only.groupworkbot.listener.TelegramBotUpdatesListenerTest;
-import m7.only.groupworkbot.services.AnimalShelterService;
-import m7.only.groupworkbot.services.EndpointService;
-import m7.only.groupworkbot.services.ReportService;
-import m7.only.groupworkbot.services.UserService;
+import m7.only.groupworkbot.services.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -41,6 +39,9 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class BotServiceImplTest {
     private static final String CORRECT_PRAY_TEXT = "Зову волонтера...";
+    private static final String CORRECT_PRAY_TEXT_WITHOUT_CONTACTS = "Необходимо оставить контактные данные для того, что бы волонтер смог с вами связаться";
+    private static final String CORRECT_PHONE_NUMBER = "4648964";
+    private static final Volunteer CORRECT_VOLUNTEER = new Volunteer();
     private static final String CORRECT_FRONT_MENU_TEXT_ENDPOINT = "/security_CAT";
     private static final String CORRECT_FRONT_MENU_ENDPOINT_TITlE = "title";
     private static final String CORRECT_FRONT_MENU_ENDPOINT_CONTENT = "content";
@@ -133,6 +134,9 @@ public class BotServiceImplTest {
 
     @Mock
     private ReportService reportServiceMock;
+
+    @Mock
+    private VolunteerService volunteerServiceMock;
 
     @InjectMocks
     private BotServiceImpl out;
@@ -290,11 +294,26 @@ public class BotServiceImplTest {
     }
 
     @Test
-    public void shouldCallExecuteEndpointPray() {
+    public void shouldCallExecuteEndpointPrayWithoutContacts() {
+        when(userServiceMock.findUserByChatIdOrCreateNew(any())).thenReturn(CORRECT_USER);
         out.process(getUpdate(CORRECT_ENDPOINT_TEXT_PRAY));
 
         ArgumentCaptor<SendMessage> argumentCaptor = ArgumentCaptor.forClass(SendMessage.class);
-        verify(telegramBotMock).execute(argumentCaptor.capture());
+        verify(telegramBotMock, times(2)).execute(argumentCaptor.capture());
+        SendMessage capturedSendMessage = argumentCaptor.getValue();
+        assertEquals(CORRECT_CHAT_ID, capturedSendMessage.getParameters().get("chat_id"));
+        assertEquals(CORRECT_PRAY_TEXT_WITHOUT_CONTACTS, capturedSendMessage.getParameters().get("text"));
+    }
+
+    @Test
+    public void shouldCallExecuteEndpointPrayWithContacts() {
+        CORRECT_USER.setPhone(CORRECT_PHONE_NUMBER);
+        when(userServiceMock.findUserByChatIdOrCreateNew(any())).thenReturn(CORRECT_USER);
+        when(volunteerServiceMock.getAll()).thenReturn(List.of(CORRECT_VOLUNTEER));
+        out.process(getUpdate(CORRECT_ENDPOINT_TEXT_PRAY));
+
+        ArgumentCaptor<SendMessage> argumentCaptor = ArgumentCaptor.forClass(SendMessage.class);
+        verify(telegramBotMock, times(2)).execute(argumentCaptor.capture());
         SendMessage capturedSendMessage = argumentCaptor.getValue();
         assertEquals(CORRECT_CHAT_ID, capturedSendMessage.getParameters().get("chat_id"));
         assertEquals(CORRECT_PRAY_TEXT, capturedSendMessage.getParameters().get("text"));
@@ -302,6 +321,7 @@ public class BotServiceImplTest {
 
     @Test
     public void shouldCallExecuteEndpointGetContacts() {
+        CORRECT_USER.setDialog(null);
         when(userServiceMock.findUserByChatIdOrCreateNew(any())).thenReturn(CORRECT_USER);
         when(userServiceMock.add(any())).thenReturn(CORRECT_USER);
 

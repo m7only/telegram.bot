@@ -166,7 +166,7 @@ public class BotServiceImpl implements BotService {
     private final ReportService reportService;
     private final VolunteerService volunteerService;
 
-    public BotServiceImpl(TelegramBot telegramBot, EndpointService endpointService, UserService userService, AnimalShelterService animalShelterService, ReportService reportService, VolunteerServiceImpl volunteerService) {
+    public BotServiceImpl(TelegramBot telegramBot, EndpointService endpointService, UserService userService, AnimalShelterService animalShelterService, ReportService reportService, VolunteerService volunteerService) {
         this.telegramBot = telegramBot;
         this.endpointService = endpointService;
         this.userService = userService;
