@@ -68,11 +68,9 @@ public class ScheduledServiceImpl implements ScheduledService {
      */
     @Override
     public void reportReminder() {
-        users.stream()
-                .peek(e -> {
-                    botService.sendResponse(e.getChatId(), DAILY_REMINDER_MESSAGE, null);
-                })
-                .collect(Collectors.toList());
+        users.forEach(e -> {
+            botService.sendResponse(e.getChatId(), DAILY_REMINDER_MESSAGE, null);
+        });
     }
 
     /**
