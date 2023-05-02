@@ -3,12 +3,13 @@ package m7.only.groupworkbot.services.impl;
 import m7.only.groupworkbot.entity.report.Report;
 import m7.only.groupworkbot.entity.user.User;
 import m7.only.groupworkbot.repository.UserRepository;
+import m7.only.groupworkbot.services.BotService;
 import m7.only.groupworkbot.services.ScheduledService;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,13 +30,17 @@ public class ScheduledServiceImpl implements ScheduledService {
     private static final String SEND_EXTEND_TRIAL_MESSAGE = "Вам назначен дополнительный период";
     private static final String SEND_FAILURE_MESSAGE = "Испытательный срок провален";
     private static final String TRIAL_SUCCESS_MESSAGE = "Закончился испытательный срок";
+
+    private static final String CORRECT_REPORT_MESSAGE = "Дорогой усыновитель, мы заметили, что ты заполняешь отчет " +
+            "не так подробно, как необходимо. Пожалуйста, подойди ответственнее к этому занятию. " +
+            "В противном случае волонтеры приюта будут обязаны самолично проверять условия содержания животного";
     // ----- FEEDBACK CONSTANT -----
 
     private final UserRepository userRepository;
-    private final BotServiceImpl botService;
+    private final BotService botService;
     private List<User> users = new ArrayList<>();
 
-    public ScheduledServiceImpl(UserRepository userRepository, BotServiceImpl botService) {
+    public ScheduledServiceImpl(UserRepository userRepository, BotService botService) {
         this.userRepository = userRepository;
         this.botService = botService;
     }
@@ -53,6 +58,8 @@ public class ScheduledServiceImpl implements ScheduledService {
         sendFailure(users);
         requestTrialSuccess(users);
         reportReminder();
+        reportReminderVolunteer();
+        sendCorrectReport(users);
     }
 
     /**
@@ -61,11 +68,9 @@ public class ScheduledServiceImpl implements ScheduledService {
      */
     @Override
     public void reportReminder() {
-        users.stream()
-                .peek(e -> {
-                    botService.sendResponse(e.getChatId(), DAILY_REMINDER_MESSAGE, null);
-                })
-                .collect(Collectors.toList());
+        users.forEach(e -> {
+            botService.sendResponse(e.getChatId(), DAILY_REMINDER_MESSAGE, null);
+        });
     }
 
     /**
@@ -74,14 +79,12 @@ public class ScheduledServiceImpl implements ScheduledService {
      */
     @Override
     public void reportReminderVolunteer() {
-        LocalDate today = LocalDate.now();
         List<Report> reports = users
                 .stream()
                 .flatMap(e -> e.getReports()
                         .stream()
                         .filter(report ->
-                                (report.getReportDate().toLocalDate().equals(today)
-                                        && report.getReportDate().toLocalDate().equals(today.minusDays(1)))))
+                                (report.getReportDate().isBefore(LocalDateTime.now().minusDays(2)))))
                 .toList();
 
         reports.forEach(report -> {
@@ -89,6 +92,22 @@ public class ScheduledServiceImpl implements ScheduledService {
         });
     }
 
+    /**
+     * При ежедневном проходе по всем усыновителям проверяем
+     * установлен ли флаг {@code User.correct_report} об корректном заполнении отчета.
+     * Если флаг стоит, то информируем усыновителя.
+     * Отправляем стандартное сообщение с дальнейшими действиями
+     *
+     * @param users лист со всеми пользователями
+     */
+    private void sendCorrectReport(List<User> users) {
+        users.stream()
+                .filter(User::getCorrectReport)
+                .peek(e -> {
+                    botService.sendResponse(e.getChatId(), CORRECT_REPORT_MESSAGE, null);
+                })
+                .collect(Collectors.toList());
+    }
 
     /**
      * При ежедневном проходе по всем усыновителям проверяем закончился ли
@@ -108,7 +127,6 @@ public class ScheduledServiceImpl implements ScheduledService {
                     }
                 })
                 .collect(Collectors.toList());
-
 
     }
 
@@ -165,9 +183,7 @@ public class ScheduledServiceImpl implements ScheduledService {
         users.stream()
                 .filter(User::getTrialSuccess)
                 .peek(e -> {
-                    if (!e.getTrialSuccess()) {
-                        botService.sendResponse(e.getVolunteer().getChatId(), TRIAL_SUCCESS_MESSAGE + e, null);
-                    }
+                    botService.sendResponse(e.getVolunteer().getChatId(), TRIAL_SUCCESS_MESSAGE + e, null);
                 })
                 .collect(Collectors.toList());
     }

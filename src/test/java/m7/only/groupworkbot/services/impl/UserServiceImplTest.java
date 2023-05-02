@@ -29,7 +29,7 @@ public class UserServiceImplTest {
 
     @Test
     void shouldSaveAndReturnCorrectUser() {
-        out.save(CORRECT_USER);
+        out.add(CORRECT_USER);
         ArgumentCaptor<User> argumentCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepositoryMock).save(argumentCaptor.capture());
         User capturedUser = argumentCaptor.getValue();

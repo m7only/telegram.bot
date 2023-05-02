@@ -13,6 +13,7 @@ import m7.only.groupworkbot.entity.Endpoint;
 import m7.only.groupworkbot.entity.report.Report;
 import m7.only.groupworkbot.entity.user.Dialog;
 import m7.only.groupworkbot.entity.user.User;
+import m7.only.groupworkbot.entity.user.Volunteer;
 import m7.only.groupworkbot.services.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -134,6 +135,7 @@ public class BotServiceImpl implements BotService {
      */
     private static final String ENDPOINT_VIOLATION = "/violation";
 
+
     /**
      * Список наших энпоинтов, чтоб не приступать к перебору если искомого в нем нет
      */
@@ -162,13 +164,15 @@ public class BotServiceImpl implements BotService {
     private final UserService userService;
     private final AnimalShelterService animalShelterService;
     private final ReportService reportService;
+    private final VolunteerService volunteerService;
 
-    public BotServiceImpl(TelegramBot telegramBot, EndpointService endpointService, UserService userService, AnimalShelterService animalShelterService, ReportService reportService) {
+    public BotServiceImpl(TelegramBot telegramBot, EndpointService endpointService, UserService userService, AnimalShelterService animalShelterService, ReportService reportService, VolunteerService volunteerService) {
         this.telegramBot = telegramBot;
         this.endpointService = endpointService;
         this.userService = userService;
         this.animalShelterService = animalShelterService;
         this.reportService = reportService;
+        this.volunteerService = volunteerService;
     }
 
     /**
@@ -359,7 +363,7 @@ public class BotServiceImpl implements BotService {
     public void executeEndpointStart(Long chatId) {
         User user = userService.findUserByChatIdOrCreateNew(chatId);
         if (user == null) {
-            userService.save(new User(chatId));
+            userService.add(new User(chatId));
         }
         List<InlineKeyboardButton> buttonList = new ArrayList<>();
         animalShelterService.findAllShelters().forEach(animalShelter ->
@@ -379,9 +383,9 @@ public class BotServiceImpl implements BotService {
      * @throws NoSuchElementException если пользователь не найден
      */
     @Override
-    public void executeEndpointMainMenu(Long chatId, String endpoint_text) {
+    public void executeEndpointMainMenu(Long chatId, String endpointText) {
         List<InlineKeyboardButton> buttonList = new ArrayList<>();
-        Endpoint endpoint = endpointService.findEndpointByEndpointText(endpoint_text);
+        Endpoint endpoint = endpointService.findEndpointByEndpointText(endpointText);
         if (endpoint != null) {
             endpoint.getChild().forEach(childEndpoint -> buttonList
                     .add(new InlineKeyboardButton(childEndpoint.getTitle())
@@ -390,7 +394,7 @@ public class BotServiceImpl implements BotService {
             sendResponse(chatId, endpoint.getContent(), buttonList);
         } else {
             sendResponse(chatId, UNSUPPORTED_ENDPOINT, null);
-            logger.error("Эндпоинт не найден: {}", endpoint_text);
+            logger.error("Эндпоинт не найден: {}", endpointText);
         }
     }
 
@@ -401,11 +405,23 @@ public class BotServiceImpl implements BotService {
      */
     @Override
     public void executeEndpointPray(Long chatId) {
-        sendResponse(
-                chatId,
-                "Зову волонтера...",
-                List.of(new InlineKeyboardButton(ENDPOINT_START)
-                        .callbackData(ENDPOINT_START)));
+        User user = userService.findUserByChatIdOrCreateNew(chatId);
+        if (user.getPhone() == null) {
+            executeEndpointGetContacts(chatId, null);
+            sendResponse(
+                    chatId,
+                    "Необходимо оставить контактные данные для того, что бы волонтер смог с вами связаться",
+                    List.of(new InlineKeyboardButton(ENDPOINT_START)
+                            .callbackData(ENDPOINT_START)));
+
+        } else {
+            executeEndpointViolation(chatId);
+            sendResponse(
+                    chatId,
+                    "Зову волонтера...",
+                    List.of(new InlineKeyboardButton(ENDPOINT_START)
+                            .callbackData(ENDPOINT_START)));
+        }
     }
 
     /**
@@ -422,21 +438,21 @@ public class BotServiceImpl implements BotService {
         if (dialog != Dialog.GET_CONTACTS_PHONE && dialog != Dialog.GET_CONTACTS_FULL_NAME) {
             sendResponse(chatId, GET_CONTACTS_GREETINGS, null);
             user.setDialog(Dialog.GET_CONTACTS_FULL_NAME);
-            userService.save(user);
+            userService.add(user);
         } else {
             switch (dialog) {
                 // если пользователь уже ввел ФИО, сохраняем фио и запрашиваем номер телефона
                 case GET_CONTACTS_FULL_NAME -> {
                     user.setFullName(endpointText);
                     user.setDialog(Dialog.GET_CONTACTS_PHONE);
-                    userService.save(user);
+                    userService.add(user);
                     sendResponse(chatId, GET_CONTACTS_PHONE, null);
                 }
                 // если пользователь ввел номер телефона, сохраняем номер телефона и показываем главное меню с выбором приюта
                 case GET_CONTACTS_PHONE -> {
                     user.setDialog(null);
                     user.setPhone(endpointText); // надо бы наверно парсить по формату
-                    userService.save(user);
+                    userService.add(user);
                     sendResponse(chatId, GET_CONTACTS_SUCCESS, null);
                     executeEndpointStart(chatId);
                 }
@@ -534,6 +550,18 @@ public class BotServiceImpl implements BotService {
      */
     @Override
     public void executeEndpointViolation(Long chatId) {
+        User user = userService.findUserByChatIdOrCreateNew(chatId);
+        if (user.getVolunteer() != null) {
+            sendResponse(user.getVolunteer().getChatId(),
+                    "Пользователь просит помощи " + user.getFullName() + user.getPhone() + " id - " + user.getChatId(),
+                    null);
+        } else {
+            List<Volunteer> volunteerList = volunteerService.getAll();
+            int random = new Random().nextInt(volunteerList.size());
+            Volunteer volunteer = volunteerList.get(random);
+            sendResponse(volunteer.getChatId(),
+                    "Пользователь просит помощи " + user.getFullName() + user.getPhone() + " id - " + user.getChatId(),
+                    null);
+        }
     }
-
 }

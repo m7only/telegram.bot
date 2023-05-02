@@ -9,5 +9,5 @@ import java.util.Optional;
  * Репозиторий сущности {@linkplain Endpoint Endpoint}
  */
 public interface EndpointRepository extends JpaRepository<Endpoint, Long> {
-    Optional<Endpoint> findByEndpointText(String endpoint_text);
+    Optional<Endpoint> findByEndpointText(String endpointText);
 }

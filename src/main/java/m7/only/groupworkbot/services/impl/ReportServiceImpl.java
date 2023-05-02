@@ -71,4 +71,68 @@ public class ReportServiceImpl implements ReportService {
                         LocalDateTime.now())
         );
     }
+
+    /**
+     * Сохранение нового отчета через API.
+     *
+     * @param report сохраняемый отчет
+     * @return {@code Report}
+     */
+    @Override
+    public Report add(Report report) {
+        return reportRepository.save(report);
+
+    }
+
+    /**
+     * Получение списка всех отчетов для API.
+     *
+     * @return {@code List<Report>}
+     */
+    @Override
+    public List<Report> getAll() {
+        return reportRepository.findAll();
+    }
+
+    /**
+     * Получение отчета по id для API.
+     *
+     * @param id идентификатор отчета
+     * @return {@code Optional<Report>}, или {@code Optional.empty()}, если не найден
+     */
+    @Override
+    public Optional<Report> getById(Long id) {
+        return reportRepository.findById(id);
+    }
+
+    /**
+     * Редактирование отчета по id для API. Проходит проверка на существование отчета.
+     *
+     * @param id     идентификатор отчета
+     * @param report тело редактируемого отчета
+     * @return {@code Optional<Report>} если изменен, или {@code Optional.empty()}, если не найден
+     */
+    @Override
+    public Optional<Report> update(Long id, Report report) {
+        return reportRepository.findById(id).isPresent()
+                ? Optional.of(reportRepository.save(report))
+                : Optional.empty();
+    }
+
+    /**
+     * Удаление отчета по id для API. Проходит проверка на существование отчета.
+     *
+     * @param id идентификатор отчета
+     * @return {@code Optional<Report>} если удален, или {@code Optional.empty()}, если не найден
+     */
+    @Override
+    public Optional<Report> delete(Long id) {
+        Optional<Report> optionalReport = reportRepository.findById(id);
+        if (reportRepository.findById(id).isPresent()) {
+            reportRepository.deleteById(id);
+            return optionalReport;
+        } else {
+            return Optional.empty();
+        }
+    }
 }
